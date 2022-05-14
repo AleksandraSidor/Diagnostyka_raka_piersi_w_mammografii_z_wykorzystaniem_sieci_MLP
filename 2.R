@@ -2,40 +2,44 @@
 #--------------------------ANALIZA DANYCH ITP-------------------------------------------
 #wczytanie danych
 data<-read.table("mammographic_masses.data", header=FALSE, sep=",");
+colnames(data) <- c('bi_rads', 'age', 'shape', 'margin', 'density', 'severity')
 
 
-nan_data <- which(data=='?'); #indeksy danych niekompletnych w całym zbiorze (bez sensu bo pokazuje indeksy jakby data było wektorem)
-new_data <- replace(data, data=='?', NaN); #zamiana ? na NaN
-
-
-#poszczegolne cechy
-bi_rads <- as.numeric(unlist(new_data[1]));
-age <- as.numeric(unlist(new_data[2]));
-shape <- as.numeric(unlist(new_data[3]));
-margin <- as.numeric(unlist(new_data[4]));
-density <- as.numeric(unlist(new_data[5]));
-severity <- as.numeric(unlist(new_data[6]));
+nan_data <- which(data=='?'); #indeksy danych niekompletnych w calym zbiorze (bez sensu bo pokazuje indeksy jakby data bylo wektorem)
+new_data <- replace(data, data=='?', NA); #zamiana ? na NA
+new_data <- as.data.frame(lapply(new_data,as.numeric)) # konwersja wszystkich wartosci w dataframie na numeric
 
 
 #-------------------------histogramy pierwsze---------------------
 
-bi_rads_h <- hist(bi_rads, main="Ocena BI-RADS", xlab="Wartość", ylab="Ilość wystąpień", xlim=c(0,max(bi_rads, na.rm = TRUE)), breaks=56, col="#9ACD32")
+bi_rads_h <- hist(new_data$bi_rads, main="Ocena BI-RADS", xlab="Wartosc", ylab="Ilosc wystapien", xlim=c(0,max(new_data$bi_rads, na.rm = TRUE)), breaks=56, col="#9ACD32")
+
 zero = which(bi_rads_h$counts == 0)
 text(bi_rads_h$mids[-zero],bi_rads_h$counts[-zero],labels=bi_rads_h$counts[-zero], adj=c(0.5, -0.5))
 
-age_h <- hist(age, main="Wiek pacjentki (w latach)", xlab="Wiek", ylab="Ilość wystąpień", xlim=c(0,100), breaks=99, col="#F08080")
+age_h <- hist(new_data$age, main="Wiek pacjentki (w latach)", xlab="Wiek", ylab="Ilosc wystapien", xlim=c(0,100), breaks=99, col="#F08080")
 
-shape_h <- hist(shape, main="Kształt guza", xlab="Kształt", ylab="Ilość wystąpień", xlim=c(0,4), breaks=0:4, col="#B0E0E6")
+
+shape_h <- hist(new_data$shape, main="Ksztalt guza", xlab="Ksztalt", ylab="Ilosc wystapien", xlim=c(0,4), breaks=0:4, col="#B0E0E6", xaxt="n")
 text(shape_h$mids,shape_h$counts,labels=shape_h$counts, adj=c(0.5, -0.5))
+axis(1, shape_h$mids, c("round", "oval", "lobular", "irregular"), line=-1, lwd=0, lwd.ticks = 1)
 
-margin_h <- hist(margin, main="Margines guza", xlab="margines", ylab="Ilość wystąpień", xlim=c(0,max(margin, na.rm = TRUE)), breaks=0:5, col="#DEB887")
+
+margin_h <- hist(new_data$margin, main="Margines guza", xlab="Margines", ylab="Ilosc wystapien", xlim=c(0,max(new_data$margin, na.rm = TRUE)), breaks=0:5, col="#DEB887", xaxt="n")
 text(margin_h$mids,margin_h$counts,labels=margin_h$counts, adj=c(0.5, -0.5))
+axis(1, at=margin_h$mids, labels = rep_len("", length(margin_h$mids)), lwd=0, lwd.ticks = 1, line = -1)
+text(margin_h$mids, par("usr")[3] - 0.2, labels = c("circumscribed", "microlobulated", "obscured", "ill-defined", "spiculated"),
+     srt = 35, pos = 1, xpd = TRUE)
 
-density_h <- hist(density, main="Gęstość guza", xlab="gęstość", ylab="Ilość wystąpień", xlim=c(0,max(density, na.rm = TRUE)), breaks=0:4, col="#BA55D3")
+
+density_h <- hist(new_data$density, main="Gestosc guza", xlab="Gestosc guza", ylab="Ilosc wystapien", xlim=c(0,max(new_data$density, na.rm = TRUE)), breaks=0:4, col="#BA55D3", xaxt="n")
 text(density_h$mids,density_h$counts,labels=density_h$counts, adj=c(0.5, -0.5))
+axis(1, density_h$mids, c("high", "iso", "low", "fat-containing"), line=-1, lwd=0, lwd.ticks = 1)
 
-severity_h <- hist(severity, right=F, main="Stopień zaawansowania guza", xlab="złośliwość", ylab="Ilość wystąpień", xlim=c(0,1), breaks=2, col="#66CDAA")
+
+severity_h <- hist(new_data$severity, right=F, main="Stopien zaawansowania guza", xlab="Zlosliwosc", ylab="Ilosc wystapien", xlim=c(0,1), ylim = c(0,600), breaks=2, col="#66CDAA", xaxt="n")
 text(severity_h$mids,severity_h$counts,labels=severity_h$counts, adj=c(0.5, -0.5))
+axis(1, severity_h$mids, c("benign", "malignant"), line=-1, lwd=0, lwd.ticks = 1)
 
 
 
@@ -53,92 +57,128 @@ static_values <- function(v) {
   var <- var(v, na.rm = TRUE)
   median <- median(v, na.rm = TRUE)
   mode <- getmode(v, na.rm = TRUE)
-  
-  return(c(min, max, mean, median, mode, sd, var))
+  res <- c(min, max, mean, median, mode, sd, var)
+  names(res) <-c('Min', 'Max', 'Mean', 'Median', 'Mode', 'Sd', 'Var')
+  return(res)
 }
 #--------------------------------------------------
 
-names = c('Min', 'Max', 'Mean', 'Median', 'Mode', 'Sd', 'Var');
+#wartosci statystyczne zbioru danych
+data_stats <- sapply(new_data, static_values)
 
-#wartości statystyczne 
-bi_rads_values <- matrix(c(names, static_values(bi_rads)), nrow = 2, byrow = TRUE);
-age_values <- matrix(c(names, static_values(age)), nrow = 2, byrow = TRUE);
-shape_values <- matrix(c(names, static_values(shape)), nrow = 2, byrow = TRUE);
-margin_values <- matrix(c(names, static_values(margin)), nrow = 2, byrow = TRUE);
-density_values <- matrix(c(names, static_values(density)), nrow = 2, byrow = TRUE);
-severity_values <- matrix(c(names, static_values(severity)), nrow = 2, byrow = TRUE);
 
 
 #------------------------USUNIECIE NIEKOMPLETNYCH DANYCH--------------------------------
 
-
-#znajdowanie indeksów z wartością NaN
-nan_bi_rads<-which(is.nan(bi_rads));
-nan_age<-which(is.nan(age));
-nan_shape<-which(is.nan(shape));
-nan_margin<-which(is.nan(margin));
-nan_density<-which(is.nan(density));
-nan_severity<-which(is.nan(severity));
-
-nan_all<-c(nan_bi_rads, nan_age, nan_shape, nan_margin, nan_density, nan_severity);
-nan_all<-unique(nan_all); #indkesy niekompletnych wierszy w data
-
-#usunięcie wektorów z niekompletnymi danymi
-data_clean<-data[-nan_all, ];
-
-#dealing with element odstający
-data_clean$V1[data_clean$V1=='55'] <- '5'
-
-#poszczegolne cechy po usunięciu niekompletnych wersów
-bi_rads_new <- as.numeric(unlist(data_clean[1]));
-age_new <- as.numeric(unlist(data_clean[2]));
-shape_new <- as.numeric(unlist(data_clean[3]));
-margin_new <- as.numeric(unlist(data_clean[4]));
-density_new <- as.numeric(unlist(data_clean[5]));
-severity_new <- as.numeric(unlist(data_clean[6]));
+data_clean <- new_data[complete.cases(new_data), ]
 
 
-
-#wartości statystyczne nowe
-bi_rads_new_values <- matrix(c(names, static_values(bi_rads_new)), nrow = 2, byrow = TRUE);
-age__new_values <- matrix(c(names, static_values(age_new)), nrow = 2, byrow = TRUE);
-shape_new_values <- matrix(c(names, static_values(shape_new)), nrow = 2, byrow = TRUE);
-margin_new_values <- matrix(c(names, static_values(margin_new)), nrow = 2, byrow = TRUE);
-density_new_values <- matrix(c(names, static_values(density_new)), nrow = 2, byrow = TRUE);
-severity_new_values <- matrix(c(names, static_values(severity_new)), nrow = 2, byrow = TRUE)
+#dealing with element odstajacy
+data_clean$bi_rads[data_clean$bi_rads==55] <- 5
 
 
 #-------------------------histogramy po czyszczeniu---------------------
 
-bi_rads_new_h <- hist(bi_rads_new, main="Ocena BI-RADS", xlab="Wartość", ylab="Ilość wystąpień", xlim=c(0,max(bi_rads_new, na.rm = TRUE)), breaks=5, col="#9ACD32")
+bi_rads_new_h <- hist(data_clean$bi_rads, main="Ocena BI-RADS", xlab="Wartosc", ylab="Ilosc wystapien", xlim=c(0,max(data_clean$bi_rads, na.rm = TRUE)), breaks=5, col="#9ACD32", xaxt="n")
 text(bi_rads_new_h$mids,bi_rads_new_h$counts,labels=bi_rads_new_h$counts, adj=c(0.5, -0.5))
+axis(1, bi_rads_new_h$mids, seq_along(bi_rads_new_h$mids))
 
-age_new_h <- hist(age_new, main="Wiek pacjentki (w latach)", xlab="Wiek", ylab="Ilość wystąpień", xlim=c(0,100), breaks=99, col="#F08080")
+age_new_h <- hist(data_clean$age, main="Wiek pacjentki (w latach)", xlab="Wiek", ylab="Ilosc wystapien", xlim=c(0,100), breaks=99, col="#F08080")
 
-shape_new_h <- hist(shape_new, main="Kształt guza", xlab="Kształt", ylab="Ilość wystąpień", xlim=c(0,4), breaks=0:4, col="#B0E0E6")
+shape_new_h <- hist(data_clean$shape, main="Ksztalt guza", xlab="Ksztalt", ylab="Ilosc wystapien", xlim=c(0,4), ylim=c(0,400), breaks=0:4, col="#B0E0E6", xaxt="n")
 text(shape_new_h$mids,shape_new_h$counts,labels=shape_new_h$counts, adj=c(0.5, -0.5))
+axis(1, shape_new_h$mids, c("round", "oval", "lobular", "irregular"), line=-1, lwd=0, lwd.ticks = 1)
 
-margin_new_h <- hist(margin_new, main="Margines guza", xlab="margines", ylab="Ilość wystąpień", xlim=c(0,max(margin_new, na.rm = TRUE)), breaks=0:5, col="#DEB887")
+margin_new_h <- hist(data_clean$margin, main="Margines guza", xlab="Margines", ylab="Ilosc wystapien", xlim=c(0,max(data_clean$margin, na.rm = TRUE)), ylim=c(0,400), breaks=0:5, col="#DEB887", xaxt="n")
 text(margin_new_h$mids,margin_new_h$counts,labels=margin_new_h$counts, adj=c(0.5, -0.5))
+axis(1, at=margin_new_h$mids, labels = rep_len("", length(margin_new_h$mids)), lwd=0, lwd.ticks = 1, line = -1)
+text(margin_new_h$mids, par("usr")[3] - 0.2, labels = c("circumscribed", "microlobulated", "obscured", "ill-defined", "spiculated"),
+     srt = 25, pos = 1, xpd = TRUE)
 
-density_new_h <- hist(density_new, main="Gęstość guza", xlab="gęstość", ylab="Ilość wystąpień", xlim=c(0,max(density_new, na.rm = TRUE)), breaks=0:4, col="#BA55D3")
+density_new_h <- hist(data_clean$density, main="Gestosc guza", xlab="Gestosc guza", ylab="Ilosc wystapien", xlim=c(0,max(data_clean$density, na.rm = TRUE)), ylim=c(0,800), breaks=0:4, col="#BA55D3", xaxt="n")
 text(density_new_h$mids,density_new_h$counts,labels=density_new_h$counts, adj=c(0.5, -0.5))
+axis(1, density_h$mids, c("high", "iso", "low", "fat-containing"), line=-1, lwd=0, lwd.ticks = 1)
 
-severity_new_h <- hist(severity_new, right=F, main="Stopień zaawansowania guza", xlab="złośliwość", ylab="Ilość wystąpień", xlim=c(0,1), breaks=2, col="#66CDAA")
+
+severity_new_h <- hist(data_clean$severity, right=F, main="Stopien zaawansowania guza", xlab="Zlosliwosc", ylab="Ilosc wystapien", xlim=c(0,1), ylim = c(0,500), breaks=2, col="#66CDAA", xaxt="n")
 text(severity_new_h$mids,severity_new_h$counts,labels=severity_new_h$counts, adj=c(0.5, -0.5))
-
+axis(1, severity_new_h$mids, c("benign", "malignant"), line=-1, lwd=0, lwd.ticks = 1)
 
 
 #------------------------------------STANDARYZACJA DANYCH-----------------------------------
-
-bi_rads_stand = scale(bi_rads_new)
-age_stand = scale(age_new)
-shape_stand = scale(shape_new)
-margin_stand = scale(margin_new)
-density_stand = scale(density_new)
+# do zakresu [-1;1] (z wyj�tkiem severity)
 
 
+data_stand <- data.frame(lapply(data_clean[,-dim(data_clean)[2]], scale), data_clean['severity'])
 
 
+#--------------------ANALIZA ZBIORU POD KATEM DETERMINANT ZLOSLIWOSCI GUZA------------------
+
+bi_rads_benVSmag <- as.matrix(t(prop.table(table(data_clean[c('bi_rads', 'severity')]), 1)))
+bi_rads_benVSmag <- cbind(bi_rads_benVSmag[,1], c(0.0,0.0), bi_rads_benVSmag[,-1])
+colnames(bi_rads_benVSmag) <- as.character(0:6)
+
+age_benVSmag <- t(prop.table(table(data_clean[c('age', 'severity')]), 1))
+shape_benVSmag <- t(prop.table(table(data_clean[c('shape', 'severity')]), 1))
+margin_benVSmag <- t(prop.table(table(data_clean[c('margin', 'severity')]), 1))
+density_benVSmag <- t(prop.table(table(data_clean[c('density', 'severity')]), 1))
 
 
+# barploty
+par(mar = c(5.1, 4.1, 4.1, 6))
+b <- barplot(bi_rads_benVSmag, col = c("seagreen3", "firebrick3"),
+        main = "Ocena BI-RADS vs. udzial guzow lagodnych/zlosliwych",
+        xlab = "Ocena BI-RADS", ylab = "%",
+        legend.text = c("benign", "malignant"),
+        args.legend = list(x = "topright", inset = c(-0.2, 0)))
+text(b[2], 0.48, "BRAK", col="tomato2", srt=90, font=2)
+
+barplot(age_benVSmag, col = c("seagreen3", "firebrick3"),
+           main = "Wiek pacjentki vs. udzial guz�w lagodnych/zlosliwych",
+           xlab = "Wiek pacjentki", ylab = "%",
+           legend.text = c("benign", "malignant"),
+           args.legend = list(x = "topright", inset = c(-0.2, 0)))
+
+b <- barplot(shape_benVSmag, col = c("seagreen3", "firebrick3"),
+           main = "Ksztalt masy vs. udzial guzow lagodnych/zlosliwych",
+           xlab = "Ksztalt masy", ylab = "%", xaxt="n",
+           legend.text = c("benign", "malignant"),
+           args.legend = list(x = "topright", inset = c(-0.2, 0)))
+
+axis(1, b, c("round", "oval", "lobular", "irregular"), line=-1, lwd=0, lwd.ticks = 1)
+
+b <- barplot(margin_benVSmag, col = c("seagreen3", "firebrick3"),
+             main = "Margines masy vs. udzial guzow lagodnych/zlosliwych",
+             xlab = "Margines masy", ylab = "%", xaxt="n",
+             legend.text = c("benign", "malignant"),
+             args.legend = list(x = "topright", inset = c(-0.2, 0)))
+
+axis(1, b, rep("", length(b)), line=-1, lwd=0, lwd.ticks = 1)
+text(b, par("usr")[3], labels = c("circumscribed", "microlobulated", "obscured", "ill-defined", "spiculated"),
+     srt = 25, pos = 1, xpd = TRUE)
+
+b <- barplot(density_benVSmag, col = c("seagreen3", "firebrick3"),
+             main = "Gestosc masy vs. udzial guzow lagodnych/zlosliwych",
+             xlab = "Gestosc masy", ylab = "%", xaxt="n",
+             legend.text = c("benign", "malignant"),
+             args.legend = list(x = "topright", inset = c(-0.2, 0)))
+
+axis(1, b, c("high", "iso", "low", "fat-containing"), line=-1, lwd=0, lwd.ticks = 1)
+
+#----------------SIEC NEURONOWA----------------------------------------
+## na razie na calosci zbioru, bez podzialu na treningowy i testowy
+
+require(neuralnet)
+
+## 2 warstwy ukryte, funkcja aktywacji=tangens hiperboliczny, funkcja straty=SSE
+nn <- neuralnet(severity ~ bi_rads+age+shape+margin+density, data=data_stand,
+                err.fct = "sse", hidden = 2, act.fct = "tanh")
+
+
+predsVStarget <- data.frame(predictions=round(unlist(nn$net.result), digits = 0), target=data_stand$severity)
+
+## Ocena skutecznosci sieci
+require(formattable)
+accuracy <- percent(sum(predsVStarget$predictions == predsVStarget$target) / nrow(predsVStarget))
+
+#----------------starczy na razie----------------------------------

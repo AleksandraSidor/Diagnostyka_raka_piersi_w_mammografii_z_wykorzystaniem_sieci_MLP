@@ -4,40 +4,46 @@
 data<-read.table("mammographic_masses.data", header=FALSE, sep=",");
 colnames(data) <- c('bi_rads', 'age', 'shape', 'margin', 'density', 'severity')
 
-
-nan_data <- which(data=='?'); #indeksy danych niekompletnych w calym zbiorze (bez sensu bo pokazuje indeksy jakby data bylo wektorem)
 new_data <- replace(data, data=='?', NA); #zamiana ? na NA
 new_data <- as.data.frame(lapply(new_data,as.numeric)) # konwersja wszystkich wartosci w dataframie na numeric
+
+# Bindowanie kolorow do cech
+featureColors <- c(bi_rads="#9ACD32",
+                  age="#F08080",
+                  shape="#B0E0E6",
+                  margin="#DEB887",
+                  density="#BA55D3",
+                  severity="#66CDAA")
 
 
 #-------------------------histogramy pierwsze---------------------
 
-bi_rads_h <- hist(new_data$bi_rads, main="Ocena BI-RADS", xlab="Wartosc", ylab="Ilosc wystapien", xlim=c(0,max(new_data$bi_rads, na.rm = TRUE)), breaks=56, col="#9ACD32")
+bi_rads_h <- hist(new_data$bi_rads, main="Ocena BI-RADS", xlab="Wartosc", ylab="Ilosc wystapien", xlim=c(0,max(new_data$bi_rads, na.rm = TRUE)), ylim=c(0, 600), breaks=56, col=featureColors['bi_rads'])
 
 zero = which(bi_rads_h$counts == 0)
 text(bi_rads_h$mids[-zero],bi_rads_h$counts[-zero],labels=bi_rads_h$counts[-zero], adj=c(0.5, -0.5))
 
-age_h <- hist(new_data$age, main="Wiek pacjentki (w latach)", xlab="Wiek", ylab="Ilosc wystapien", xlim=c(0,100), breaks=99, col="#F08080")
+age_h <- hist(new_data$age, main="Wiek pacjentki (w latach)", xlab="Wiek", ylab="Ilosc wystapien", xlim=c(0,100), breaks=99, col=featureColors['age'])
 
 
-shape_h <- hist(new_data$shape, main="Ksztalt guza", xlab="Ksztalt", ylab="Ilosc wystapien", xlim=c(0,4), breaks=0:4, col="#B0E0E6", xaxt="n")
+shape_h <- hist(new_data$shape, main="Ksztalt guza", xlab="Ksztalt", ylab="Ilosc wystapien", xlim=c(0,4), ylim=c(0, 450), breaks=0:4, col=featureColors['shape'], xaxt="n")
 text(shape_h$mids,shape_h$counts,labels=shape_h$counts, adj=c(0.5, -0.5))
 axis(1, shape_h$mids, c("round", "oval", "lobular", "irregular"), line=-1, lwd=0, lwd.ticks = 1)
 
 
-margin_h <- hist(new_data$margin, main="Margines guza", xlab="Margines", ylab="Ilosc wystapien", xlim=c(0,max(new_data$margin, na.rm = TRUE)), breaks=0:5, col="#DEB887", xaxt="n")
+margin_h <- hist(new_data$margin, main="Margines guza", xlab="Margines", ylab="Ilosc wystapien", xlim=c(0,max(new_data$margin, na.rm = TRUE)), ylim=c(0, 400), breaks=0:5, col=featureColors['margin'], xaxt="n")
 text(margin_h$mids,margin_h$counts,labels=margin_h$counts, adj=c(0.5, -0.5))
 axis(1, at=margin_h$mids, labels = rep_len("", length(margin_h$mids)), lwd=0, lwd.ticks = 1, line = -1)
 text(margin_h$mids, par("usr")[3] - 0.2, labels = c("circumscribed", "microlobulated", "obscured", "ill-defined", "spiculated"),
      srt = 35, pos = 1, xpd = TRUE)
 
 
-density_h <- hist(new_data$density, main="Gestosc guza", xlab="Gestosc guza", ylab="Ilosc wystapien", xlim=c(0,max(new_data$density, na.rm = TRUE)), breaks=0:4, col="#BA55D3", xaxt="n")
+density_h <- hist(new_data$density, main="Gestosc guza", xlab="Gestosc guza", ylab="Ilosc wystapien", xlim=c(0,max(new_data$density, na.rm = TRUE)), ylim=c(0, 850), breaks=0:4, col=featureColors['density'], xaxt="n")
 text(density_h$mids,density_h$counts,labels=density_h$counts, adj=c(0.5, -0.5))
 axis(1, density_h$mids, c("high", "iso", "low", "fat-containing"), line=-1, lwd=0, lwd.ticks = 1)
 
 
-severity_h <- hist(new_data$severity, right=F, main="Stopien zaawansowania guza", xlab="Zlosliwosc", ylab="Ilosc wystapien", xlim=c(0,1), ylim = c(0,600), breaks=2, col="#66CDAA", xaxt="n")
+severity_h <- hist(new_data$severity, right=F, main="Stopien zaawansowania guza", xlab="Zlosliwosc", ylab="Ilosc wystapien", xlim=c(0,1), ylim = c(0,600), breaks=2, col=featureColors['severity'], xaxt="n")
 text(severity_h$mids,severity_h$counts,labels=severity_h$counts, adj=c(0.5, -0.5))
 axis(1, severity_h$mids, c("benign", "malignant"), line=-1, lwd=0, lwd.ticks = 1)
 
@@ -79,37 +85,31 @@ data_clean$bi_rads[data_clean$bi_rads==55] <- 5
 
 #-------------------------histogramy po czyszczeniu---------------------
 
-bi_rads_new_h <- hist(data_clean$bi_rads, main="Ocena BI-RADS", xlab="Wartosc", ylab="Ilosc wystapien", xlim=c(0,max(data_clean$bi_rads, na.rm = TRUE)), breaks=5, col="#9ACD32", xaxt="n")
+bi_rads_new_h <- hist(data_clean$bi_rads, main="Ocena BI-RADS", xlab="Wartosc", ylab="Ilosc wystapien", xlim=c(0,max(data_clean$bi_rads, na.rm = TRUE)), ylim=c(0, 500), breaks=5, col=featureColors['bi_rads'], xaxt="n")
 text(bi_rads_new_h$mids,bi_rads_new_h$counts,labels=bi_rads_new_h$counts, adj=c(0.5, -0.5))
 axis(1, bi_rads_new_h$mids, seq_along(bi_rads_new_h$mids))
 
-age_new_h <- hist(data_clean$age, main="Wiek pacjentki (w latach)", xlab="Wiek", ylab="Ilosc wystapien", xlim=c(0,100), breaks=99, col="#F08080")
+age_new_h <- hist(data_clean$age, main="Wiek pacjentki (w latach)", xlab="Wiek", ylab="Ilosc wystapien", xlim=c(0,100), breaks=99, col=featureColors['age'])
 
-shape_new_h <- hist(data_clean$shape, main="Ksztalt guza", xlab="Ksztalt", ylab="Ilosc wystapien", xlim=c(0,4), ylim=c(0,400), breaks=0:4, col="#B0E0E6", xaxt="n")
+shape_new_h <- hist(data_clean$shape, main="Ksztalt guza", xlab="Ksztalt", ylab="Ilosc wystapien", xlim=c(0,4), ylim=c(0,400), breaks=0:4, col=featureColors['shape'], xaxt="n")
 text(shape_new_h$mids,shape_new_h$counts,labels=shape_new_h$counts, adj=c(0.5, -0.5))
 axis(1, shape_new_h$mids, c("round", "oval", "lobular", "irregular"), line=-1, lwd=0, lwd.ticks = 1)
 
-margin_new_h <- hist(data_clean$margin, main="Margines guza", xlab="Margines", ylab="Ilosc wystapien", xlim=c(0,max(data_clean$margin, na.rm = TRUE)), ylim=c(0,400), breaks=0:5, col="#DEB887", xaxt="n")
+margin_new_h <- hist(data_clean$margin, main="Margines guza", xlab="Margines", ylab="Ilosc wystapien", xlim=c(0,max(data_clean$margin, na.rm = TRUE)), ylim=c(0,400), breaks=0:5, col=featureColors['margin'], xaxt="n")
 text(margin_new_h$mids,margin_new_h$counts,labels=margin_new_h$counts, adj=c(0.5, -0.5))
 axis(1, at=margin_new_h$mids, labels = rep_len("", length(margin_new_h$mids)), lwd=0, lwd.ticks = 1, line = -1)
 text(margin_new_h$mids, par("usr")[3] - 0.2, labels = c("circumscribed", "microlobulated", "obscured", "ill-defined", "spiculated"),
      srt = 25, pos = 1, xpd = TRUE)
 
-density_new_h <- hist(data_clean$density, main="Gestosc guza", xlab="Gestosc guza", ylab="Ilosc wystapien", xlim=c(0,max(data_clean$density, na.rm = TRUE)), ylim=c(0,800), breaks=0:4, col="#BA55D3", xaxt="n")
+density_new_h <- hist(data_clean$density, main="Gestosc guza", xlab="Gestosc guza", ylab="Ilosc wystapien", xlim=c(0,max(data_clean$density, na.rm = TRUE)), ylim=c(0,800), breaks=0:4, col=featureColors['density'], xaxt="n")
 text(density_new_h$mids,density_new_h$counts,labels=density_new_h$counts, adj=c(0.5, -0.5))
 axis(1, density_h$mids, c("high", "iso", "low", "fat-containing"), line=-1, lwd=0, lwd.ticks = 1)
 
 
-severity_new_h <- hist(data_clean$severity, right=F, main="Stopien zaawansowania guza", xlab="Zlosliwosc", ylab="Ilosc wystapien", xlim=c(0,1), ylim = c(0,500), breaks=2, col="#66CDAA", xaxt="n")
+severity_new_h <- hist(data_clean$severity, right=F, main="Stopien zaawansowania guza", xlab="Zlosliwosc", ylab="Ilosc wystapien", xlim=c(0,1), ylim = c(0,500), breaks=2, col=featureColors['severity'], xaxt="n")
 text(severity_new_h$mids,severity_new_h$counts,labels=severity_new_h$counts, adj=c(0.5, -0.5))
 axis(1, severity_new_h$mids, c("benign", "malignant"), line=-1, lwd=0, lwd.ticks = 1)
 
-
-#------------------------------------STANDARYZACJA DANYCH-----------------------------------
-# do zakresu [-1;1] (z wyj¹tkiem severity)
-
-
-data_stand <- data.frame(lapply(data_clean[,-dim(data_clean)[2]], scale), data_clean['severity'])
 
 
 #--------------------ANALIZA ZBIORU POD KATEM DETERMINANT ZLOSLIWOSCI GUZA------------------
@@ -165,20 +165,35 @@ b <- barplot(density_benVSmag, col = c("seagreen3", "firebrick3"),
 
 axis(1, b, c("high", "iso", "low", "fat-containing"), line=-1, lwd=0, lwd.ticks = 1)
 
+
+#------------------------------------STANDARYZACJA DANYCH-----------------------------------
+# do zakresu [-1;1] (z wyj¹tkiem severity)
+
+
+data_stand <- data.frame(lapply(data_clean[,-dim(data_clean)[2]], scale), data_clean['severity'])
+
+
+
 #----------------SIEC NEURONOWA----------------------------------------
 ## na razie na calosci zbioru, bez podzialu na treningowy i testowy
 
 require(neuralnet)
 
-## 2 warstwy ukryte, funkcja aktywacji=tangens hiperboliczny, funkcja straty=SSE
+## 2 warstwy ukryte, funkcja aktywacji=sigmoid, funkcja straty=SSE
 nn <- neuralnet(severity ~ bi_rads+age+shape+margin+density, data=data_stand,
-                err.fct = "sse", hidden = 2, act.fct = "tanh")
+                err.fct = "sse", hidden = 2, act.fct = "logistic")
 
 
-predsVStarget <- data.frame(predictions=round(unlist(nn$net.result), digits = 0), target=data_stand$severity)
+predsVStarget <- data.frame(case=rownames(data_stand),
+                            predictions=factor(round(unlist(nn$net.result), digits = 0), labels = c('benign', 'malignant')),
+                            target=factor(data_stand$severity, labels = c('benign', 'malignant')))
 
-## Ocena skutecznosci sieci
-require(formattable)
-accuracy <- percent(sum(predsVStarget$predictions == predsVStarget$target) / nrow(predsVStarget))
+## Macierz pomylek
+require(caret)
+confMatrix <- confusionMatrix(data=predsVStarget$predictions, reference=predsVStarget$target, positive = "malignant")
 
-#----------------starczy na razie----------------------------------
+fourfoldplot(confMatrix$table, color = c("firebrick2", "seagreen3"),
+             conf.level = 0, margin = 1, main = "Macierz pomylek")
+
+
+

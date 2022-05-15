@@ -196,4 +196,15 @@ fourfoldplot(confMatrix$table, color = c("firebrick2", "seagreen3"),
              conf.level = 0, margin = 1, main = "Macierz pomylek")
 
 
+# Faktoryzacja danych w data_clean na konkretne labele
+# shape: [1,2,3,4] -> ["round", "oval", "lobular", "irregular"]
+# margin: [1,2,3,4,5] -> ["circumscribed", "microlobulated", "obscured", "ill-defined", "spiculated"]
+# density: [1,2,3,4] -> ["high", "iso", "low", "fat-containing"]
+# severity: [0,1] -> ["benign", "malignant"]
 
+data_factorized <- data.frame(bi_rads=factor(data_clean$bi_rads),
+                              age=factor(data_clean$age),
+                              shape=factor(data_clean$shape, labels = c("round", "oval", "lobular", "irregular")),
+                              margin=factor(data_clean$margin, labels = c("circumscribed", "microlobulated", "obscured", "ill-defined", "spiculated")),
+                              density=factor(data_clean$density, labels = c("high", "iso", "low", "fat-containing")),
+                              severity=factor(data_clean$severity, levels=c(1,0), labels= c("malignant", "benign")))

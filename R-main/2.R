@@ -1,4 +1,4 @@
-setwd("C:/Users/aleks/OneDrive/Pulpit/sem6/PADR/R-main/R-main")
+
 #--------------------------ANALIZA DANYCH ITP-------------------------------------------
 #wczytanie danych
 data<-read.table("mammographic_masses.data", header=FALSE, sep=",");
@@ -169,9 +169,13 @@ axis(1, b, c("high", "iso", "low", "fat-containing"), line=-1, lwd=0, lwd.ticks 
 #------------------------------------STANDARYZACJA DANYCH-----------------------------------
 # do zakresu [-1;1] (z wyj¹tkiem severity)
 
+s <- scale(data_clean[,-6])
+# œrednie i odchylenia standardowe u¿yte do standaryzacji s¹ zapamiêtywane
+# w celu póŸniejszej standaryzacji danych wprowadzanych przez u¿ytkownika
+scaled_centers <- attr(s, 'scaled:center')
+scaled_scales <- attr(s, 'scaled:scale')
 
-data_stand <- data.frame(lapply(data_clean[,-dim(data_clean)[2]], scale), data_clean['severity'])
-
+data_stand <- data.frame(bi_rads=s[,1], age=s[,2], shape=s[,3], margin=s[,4], density=s[,5], data_clean['severity'])
 
 
 #----------------SIEC NEURONOWA----------------------------------------

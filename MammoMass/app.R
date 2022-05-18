@@ -8,6 +8,7 @@
 #
 
 library(shiny)
+library(plotly)
 setwd("C:/Users/Admin/Studia/Semestr 6/PADR/R")
 # Ladowanie danych obliczonych w pliku '2.R'
 source("2.R")
@@ -44,11 +45,15 @@ ui <- fluidPage(
 
 
         mainPanel(
-          fluidRow(
-            plotOutput("barPlot")
-          ),
-          fluidRow(
-            plotOutput("benVSmagPlot")
+          tabsetPanel(
+            tabPanel(title = "Feature analysis",
+                     fluidRow(plotlyOutput("barPlot")),
+                     fluidRow(plotlyOutput("benVSmagPlot"))
+            ),
+            
+            tabPanel(title = "Confusion matrix",
+                     tableOutput("confMatrix")
+            )
           )
         )
     )
@@ -57,28 +62,39 @@ ui <- fluidPage(
 
 server <- function(input, output) {
   
-    output$barPlot <- renderPlot({
+    output$barPlot <- renderPlotly({
         chosen_feature <- input$feature
         
-        ggplot(data_factorized, aes_string(chosen_feature)) +
+        p <- ggplot(data_factorized, aes_string(chosen_feature)) +
           geom_bar(fill=featureColors[chosen_feature]) +
           ggtitle(paste("Histogram for", chosen_feature, sep=" ")) +
           theme_minimal() +
           theme(plot.title = element_text(size=20, face="bold"))
+        if (chosen_feature == "age") {
+          p <- p + scale_x_discrete(breaks = seq(15, 100, by=5))
+        }
+        ggplotly(p)
           
     })
     
-    output$benVSmagPlot <- renderPlot({
+    output$benVSmagPlot <- renderPlotly({
         chosen_feature <- input$feature
         chosen_metric <- input$metric
         
-        ggplot(data=data_factorized, aes_string(fill='severity', x=chosen_feature)) +
+        p <- ggplot(data=data_factorized, aes_string(fill='severity', x=chosen_feature)) +
           geom_bar(stat = 'count', position = chosen_metric) +
           ylab(stackedBarPlotYLabs[chosen_metric]) +
           ggtitle(paste("Distribution of mass severity with respect to", chosen_feature, sep=" ")) +
           theme_minimal() +
           theme(plot.title = element_text(size=20, face="bold"))
+        
+        if (chosen_feature == "age") {
+          p <- p + scale_x_discrete(breaks = seq(15, 100, by=5))
+        }
+        ggplotly(p)
     })
+    
+    output$confMatrix <- renderTable(expr = {confMatrix$table})
 }
 
 # Run the application 

@@ -8,7 +8,12 @@
 #
 
 library(shiny)
-setwd("C:/Users/aleks/OneDrive/Pulpit/sem6/PADR/R-main/R-main")
+library(plotly)
+
+stackedBarPlotYLabs <- c(stack='Number of cases',
+                         fill='% of cases')
+
+setwd("C:/Users/Admin/Studia/Semestr 6/PADR/R-main/R-main")
 # Ladowanie danych obliczonych w pliku '2.R'
 source("2.R")
 
@@ -62,7 +67,7 @@ ui <- navbarPage(
            )
   ),
   tabPanel("Overview of neural network",
-           # Sidebar with a slider input for number of bins 
+
            sidebarLayout(
              sidebarPanel(
                fluidRow(selectInput(inputId = 'feature',
@@ -85,10 +90,10 @@ ui <- navbarPage(
              
              mainPanel(
                fluidRow(
-                 plotOutput("barPlot")
+                 plotlyOutput("barPlot")
                ),
                fluidRow(
-                 plotOutput("benVSmagPlot")
+                 plotlyOutput("benVSmagPlot")
                )
              )
            ))
@@ -101,7 +106,7 @@ server <- function(input, output) {
   
   
   observeEvent(input$submit, {v <-c(as.numeric(input$bi_rads), input$age, as.numeric(input$shape), as.numeric(input$margin), as.numeric(input$density))
-                pred <-predict(nn, t(scale(v)))
+                pred <-predict(nn, scale(t(v), center = scaled_centers, scale = scaled_scales))
                 if(pred>= 0.5) {
                   output$selected_var <- renderText({paste(pred, 'MALIGNANT')})
                 }
@@ -110,27 +115,40 @@ server <- function(input, output) {
                 }
                 })
   
-  output$barPlot <- renderPlot({
+  output$barPlot <- renderPlotly({
     chosen_feature <- input$feature
     
-    ggplot(data_factorized, aes_string(chosen_feature)) +
-      geom_bar(fill=featureColors[chosen_feature]) +
-      ggtitle(paste("Histogram for", chosen_feature, sep=" ")) +
-      theme_minimal() +
-      theme(plot.title = element_text(size=20, face="bold"))
+    p <- ggplot(data_factorized, aes_string(chosen_feature)) +
+          geom_bar(fill=featureColors[chosen_feature]) +
+          ggtitle(paste("Histogram for", chosen_feature, sep=" ")) +
+          theme_minimal() +
+          theme(plot.title = element_text(size=20, face="bold"))
+    
+    if(chosen_feature=="age") {
+      p <- p + scale_x_discrete(breaks=seq(15,100,5))
+    }
+    
+    ggplotly(p)
     
   })
   
-  output$benVSmagPlot <- renderPlot({
+  output$benVSmagPlot <- renderPlotly({
     chosen_feature <- input$feature
     chosen_metric <- input$metric
     
-    ggplot(data=data_factorized, aes_string(fill='severity', x=chosen_feature)) +
-      geom_bar(stat = 'count', position = chosen_metric) +
-      #ylab(stackedBarPlotYLabs[chosen_metric]) +
-      ggtitle(paste("Distribution of mass severity with respect to", chosen_feature, sep=" ")) +
-      theme_minimal() +
-      theme(plot.title = element_text(size=20, face="bold"))
+    
+    p <- ggplot(data=data_factorized, aes_string(fill='severity', x=chosen_feature)) +
+        geom_bar(stat = 'count', position = chosen_metric) +
+        ylab(stackedBarPlotYLabs[chosen_metric]) +
+        ggtitle(paste("Distribution of mass severity with respect to", chosen_feature, sep=" ")) +
+        theme_minimal() +
+        theme(plot.title = element_text(size=20, face="bold"))
+    
+    if(chosen_feature=="age") {
+      p <- p + scale_x_discrete(breaks=seq(15,100,5))
+    }
+    
+    ggplotly(p)
   })
 }
 

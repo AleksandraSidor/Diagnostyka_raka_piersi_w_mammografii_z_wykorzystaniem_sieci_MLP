@@ -13,8 +13,8 @@ library(plotly)
 stackedBarPlotYLabs <- c(stack='Number of cases',
                          fill='% of cases')
 
-setwd("C:/Users/aleks/OneDrive/Pulpit/sem6/PADR/R-main/R-main")
 # Ladowanie danych obliczonych w pliku '2.R'
+setwd("C:/Users/Admin/Studia/Semestr 6/PADR/R-main")
 source("2.R")
 
 # Define UI for application that draws a histogram

@@ -1,4 +1,4 @@
-
+setwd("C:/Users/aleks/OneDrive/Pulpit/sem6/PADR/R-main/R-main")
 #--------------------------ANALIZA DANYCH ITP-------------------------------------------
 #wczytanie danych
 data<-read.table("mammographic_masses.data", header=FALSE, sep=",");
@@ -9,11 +9,11 @@ new_data <- as.data.frame(lapply(new_data,as.numeric)) # konwersja wszystkich wa
 
 # Bindowanie kolorow do cech
 featureColors <- c(bi_rads="#9ACD32",
-                  age="#F08080",
-                  shape="#B0E0E6",
-                  margin="#DEB887",
-                  density="#BA55D3",
-                  severity="#66CDAA")
+                   age="#F08080",
+                   shape="#B0E0E6",
+                   margin="#DEB887",
+                   density="#BA55D3",
+                   severity="#66CDAA")
 
 
 #-------------------------histogramy pierwsze---------------------
@@ -85,7 +85,7 @@ data_clean$bi_rads[data_clean$bi_rads==55] <- 5
 
 #-------------------------histogramy po czyszczeniu---------------------
 
-bi_rads_new_h <- hist(data_clean$bi_rads, main="Ocena BI-RADS", xlab="Wartosc", ylab="Ilosc wystapien", xlim=c(0,max(data_clean$bi_rads, na.rm = TRUE)), ylim=c(0, 500), breaks=5, col=featureColors['bi_rads'], xaxt="n")
+bi_rads_new_h <- hist(data_clean$bi_rads, main="Ocena BI-RADS", xlab="Wartosc", ylab="Ilosc wystapien", xlim=c(0,6), ylim=c(0, 500), breaks=-0.5:6.5, col=featureColors['bi_rads'], xaxt="n")
 text(bi_rads_new_h$mids,bi_rads_new_h$counts,labels=bi_rads_new_h$counts, adj=c(0.5, -0.5))
 axis(1, bi_rads_new_h$mids, seq_along(bi_rads_new_h$mids))
 
@@ -127,23 +127,23 @@ density_benVSmag <- t(prop.table(table(data_clean[c('density', 'severity')]), 1)
 # barploty
 par(mar = c(5.1, 4.1, 4.1, 6))
 b <- barplot(bi_rads_benVSmag, col = c("seagreen3", "firebrick3"),
-        main = "Ocena BI-RADS vs. udzial guzow lagodnych/zlosliwych",
-        xlab = "Ocena BI-RADS", ylab = "%",
-        legend.text = c("benign", "malignant"),
-        args.legend = list(x = "topright", inset = c(-0.2, 0)))
+             main = "Ocena BI-RADS vs. udzial guzow lagodnych/zlosliwych",
+             xlab = "Ocena BI-RADS", ylab = "%",
+             legend.text = c("benign", "malignant"),
+             args.legend = list(x = "topright", inset = c(-0.2, 0)))
 text(b[2], 0.48, "BRAK", col="tomato2", srt=90, font=2)
 
 barplot(age_benVSmag, col = c("seagreen3", "firebrick3"),
-           main = "Wiek pacjentki vs. udzial guzów lagodnych/zlosliwych",
-           xlab = "Wiek pacjentki", ylab = "%",
-           legend.text = c("benign", "malignant"),
-           args.legend = list(x = "topright", inset = c(-0.2, 0)))
+        main = "Wiek pacjentki vs. udzial guzów lagodnych/zlosliwych",
+        xlab = "Wiek pacjentki", ylab = "%",
+        legend.text = c("benign", "malignant"),
+        args.legend = list(x = "topright", inset = c(-0.2, 0)))
 
 b <- barplot(shape_benVSmag, col = c("seagreen3", "firebrick3"),
-           main = "Ksztalt masy vs. udzial guzow lagodnych/zlosliwych",
-           xlab = "Ksztalt masy", ylab = "%", xaxt="n",
-           legend.text = c("benign", "malignant"),
-           args.legend = list(x = "topright", inset = c(-0.2, 0)))
+             main = "Ksztalt masy vs. udzial guzow lagodnych/zlosliwych",
+             xlab = "Ksztalt masy", ylab = "%", xaxt="n",
+             legend.text = c("benign", "malignant"),
+             args.legend = list(x = "topright", inset = c(-0.2, 0)))
 
 axis(1, b, c("round", "oval", "lobular", "irregular"), line=-1, lwd=0, lwd.ticks = 1)
 
@@ -167,11 +167,15 @@ axis(1, b, c("high", "iso", "low", "fat-containing"), line=-1, lwd=0, lwd.ticks 
 
 
 #------------------------------------STANDARYZACJA DANYCH-----------------------------------
-# do zakresu [-1;1] (z wyj¹tkiem severity)
+# do zakresu [-1;1] (z wyj1tkiem severity)
 
+s <- scale(data_clean[,2:5])
+# ??rednie i odchylenia standardowe u??yte do standaryzacji s1 zapamietywane
+# w celu pó??niejszej standaryzacji danych wprowadzanych przez u??ytkownika
+scaled_centers <- attr(s, 'scaled:center')
+scaled_scales <- attr(s, 'scaled:scale')
 
-data_stand <- data.frame(lapply(data_clean[,-dim(data_clean)[2]], scale), data_clean['severity'])
-
+data_stand <- data.frame(age=s[,1], shape=s[,2], margin=s[,3], density=s[,4], data_clean['severity'])
 
 
 #----------------SIEC NEURONOWA----------------------------------------
@@ -180,7 +184,7 @@ data_stand <- data.frame(lapply(data_clean[,-dim(data_clean)[2]], scale), data_c
 require(neuralnet)
 
 ## 2 warstwy ukryte, funkcja aktywacji=sigmoid, funkcja straty=SSE
-nn <- neuralnet(severity ~ bi_rads+age+shape+margin+density, data=data_stand,
+nn <- neuralnet(severity ~ age+shape+margin+density, data=data_stand,
                 err.fct = "sse", hidden = 2, act.fct = "logistic")
 
 
@@ -197,12 +201,11 @@ fourfoldplot(confMatrix$table, color = c("firebrick2", "seagreen3"),
 
 
 # Faktoryzacja danych w data_clean na konkretne labele
-# shape: [1,2,3,4] -> ["round", "oval", "lobular", "irregular"]
 # margin: [1,2,3,4,5] -> ["circumscribed", "microlobulated", "obscured", "ill-defined", "spiculated"]
 # density: [1,2,3,4] -> ["high", "iso", "low", "fat-containing"]
 # severity: [0,1] -> ["benign", "malignant"]
 
-data_factorized <- data.frame(bi_rads=factor(data_clean$bi_rads),
+data_factorized <- data.frame(bi_rads=factor(data_clean$bi_rads, levels=(0:6)),
                               age=factor(data_clean$age),
                               shape=factor(data_clean$shape, labels = c("round", "oval", "lobular", "irregular")),
                               margin=factor(data_clean$margin, labels = c("circumscribed", "microlobulated", "obscured", "ill-defined", "spiculated")),

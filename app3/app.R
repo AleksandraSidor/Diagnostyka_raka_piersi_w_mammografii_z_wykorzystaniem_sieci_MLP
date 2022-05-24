@@ -9,136 +9,248 @@
 
 library(shiny)
 library(plotly)
+library(shinydashboard)
+library(shinyjs)
+
+status <- reactiveVal();
 
 stackedBarPlotYLabs <- c(stack='Number of cases',
                          fill='% of cases')
 
 # Ladowanie danych obliczonych w pliku '2.R'
+#setwd("C:/Users/aleks/OneDrive/Pulpit/sem6/PADR/R-main")
 setwd("C:/Users/Admin/Studia/Semestr 6/PADR/R-main")
-source("2.R")
+source("3.R")
 
 # Define UI for application that draws a histogram
-ui <- navbarPage(
-  title = span("Title",style="color:red"),
-  tabPanel("Overview of neural network",
-           
-           sidebarLayout(
-             sidebarPanel(
-               fluidRow(selectInput(inputId = 'feature',
-                                    label = 'Select dataset feature to display:',
-                                    choices = list(`BI-RADS assesment`="bi_rads",
-                                                   `Patient's age`="age",
-                                                   `Mass shape`="shape",
-                                                   `Mass margin`="margin",
-                                                   `Mass density`="density",
-                                                   `Mass severity`="severity"),
-                                    selected = "bi_rads")),
-               
-               fluidRow(selectInput(inputId = 'metric',
-                                    label = 'Select metric of stacked bar plot:',
-                                    choices = list(`Number of cases`='stack',
-                                                   `% of cases`="fill"),
-                                    selected = "stack"))
-             ),
-             
-             
-             mainPanel(
-               fluidRow(
-                 plotlyOutput("barPlot")
-               ),
-               fluidRow(
-                 plotlyOutput("benVSmagPlot")
-               )
-             )
-           )),
-  tabPanel("Try network",
-           
-           sidebarLayout(
-             mainPanel(),
-             
-             sidebarPanel(width=12, style = 'background-color: #D8E9E9', 
-                          p("TRY NETWORK", style='font-size: 36px', align = 'center'),
-                          p("tutaj  jakis ladny tekscik ze uzytkownik sb moze wpisac wartosci imaginary albo prawdziwe i sb zobaczyc swoja diagnoze",
-                            style='font-size: 28px', align = 'center' )
-                          
-             )
-           ),
-           fluidRow(
-             sidebarPanel(width=8, style = 'background-color: #FFFFFF',
-                          fluidRow(column(5, align = 'center',
-                                          numericInput(inputId = 'age',
-                                                                    label = "Patient's age",
-                                                                    value = 50,
-                                                                    min = 18)),
-                                   column(5, offset=1, align = 'center',
-                                          selectInput(inputId = 'shape',
-                                                         label = 'Mass shape',
-                                                         choices = c('round - 1' = 1, 'oval - 2' = 2, 'lobular - 3' = 3, 'irregular - 4' = 4)))),
-                          
-                          fluidRow(column(5, align = 'center',
-                                          selectInput(inputId = 'margin',
-                                                                  label = 'Mass margin',
-                                                                  choices = c('circumscribed - 1' = 1, 'microlobulated - 2' = 2, 'obscured - 3' = 3, 'ill-defined - 4' = 4, 'spiculated - 5' = 5))),
-                                   column(5, offset=1, align = 'center',
-                                          selectInput(inputId = 'density',
-                                                         label = 'Mass density',
-                                                         choices = c('high - 1' = 1, 'iso - 2' = 2, 'low - 3' = 3, 'fat-containing - 4' = 4))))
-                          
-                          
-                          
-                          # fluidRow(column(5, offset=8, actionButton(inputId = 'submit', label = "Sumbit", width = '200px', style = 'background-color: #D8E9E9')))
-                          
-                          
-                          
-             ),
-             sidebarPanel(width = 4, style = 'background-color: #FFFFFF',
-                          fluidRow(column(10, offset = 1, align = 'center',
-                                          selectInput(inputId = 'layers',
-                                                label = 'Number of hidden layers',
-                                                choices = c('1' = 1, '2' = 2)))),
-                          fluidRow(column(5, offset = 1, align = 'center',
-                                          numericInput(inputId = 'first_layer',
-                                                          label = 'Number of neurons in 1st layer',
-                                                          value = 3,
-                                                          min = 1,
-                                                          max = 8, 
-                                                          step = 1)),
-                                   column(5, align = 'center',
-                                          numericInput(inputId = 'second_layer',
-                                                          label = 'Number of neurons in 2nd layer',
-                                                          value = 3,
-                                                          min = 1,
-                                                          max = 8, 
-                                                          step = 1))))),
-           fluidRow(style = 'padding: 10px', align = 'center', actionButton(inputId = 'submit', label = "Sumbit", width = '400px', style = 'background-color: #D8E9E9')),
+ui <- dashboardPage(skin = "green",
+                    dashboardHeader(title = span("Neural network")),
+                    dashboardSidebar(
+                      sidebarMenu(style = 'background-color: #FFFFFF',
+                                  menuItem("Overview", tabName = "Overview", icon = icon('table', class = 'menu_icon')),
+                                  menuItem("Neural network", tabName = "Try", icon = icon('magic', class = 'menu_icon'))
+                      )
+                    ),
+                    dashboardBody(tags$head(tags$style(HTML('
+.skin-green {
+  background-color: rgb(121, 180, 183);
+}
 
-           fluidRow(
-             column(style = 'padding:50px', width = 6, align = 'right',  "Your diagnose: "),
-           column(style = 'padding:50px', width = 6, textOutput('selected_var')))
-            
-  )
+.skin-green .main-header .logo {
+  background-color: rgb(121, 180, 183);
+}
 
-  
-)
+.skin-green .main-header .logo:hover {
+  background-color: rgb(121, 180, 183);
+}
+                          
+.skin-green .main-header .navbar {
+  background-color: rgb(121, 180, 183);
+}
+                          
+.skin-green .main-sidebar {
+  background-color: 	#D3D3D3;
+}
+
+.skin-green .main-sidebar .sidebar .sidebar-menu{
+  background-color:	rgb(25, 76, 47);
+  font-family: helvetica, sans-serif;
+  font-size: 1.5em
+}
+
+.menu_icon {
+  margin-right: 5px;
+}
+                
+.skin-green .main-sidebar .sidebar .sidebar-menu .active a{
+  background-color:	rgb(157, 157, 157);
+}
+
+.skin-green .main-sidebar .sidebar .sidebar-menu a:hover{
+  background-color: hsl(0, 0%, 32%);
+  cursor: pointer;
+}
+
+.skin-green .main-header .navbar .sidebar-toggle:hover{
+         background-color: gray;
+}
+                          
+.content-wrapper, .right-side {
+  background-color: #FFFFFF;
+}
+
+.small-box {
+  height: 200px;
+}
+
+.boxIcon {
+  font-size: 2em;
+}
+'))),
+tags$script("
+      Shiny.addCustomMessageHandler('status-color', function(color) {
+        document.getElementById('prediction').style.color = color;
+
+      });
+    "),
+                      tabItems(
+                        tabItem(tabName = "Overview", style = 'background-color: #FFFFFF',
+                                tabBox(title="Dataset analysis panel", width="100%", height="100%", 
+                                       tabPanel(title = "Histograms",
+                                sidebarLayout(
+                                  sidebarPanel(width = 3,
+                                               fluidRow(selectInput(inputId = 'feature',
+                                                                    label = 'Select dataset feature to display:',
+                                                                    choices = list(`BI-RADS assesment`="bi_rads",
+                                                                                   `Patient's age`="age",
+                                                                                   `Mass shape`="shape",
+                                                                                   `Mass margin`="margin",
+                                                                                   `Mass density`="density",
+                                                                                   `Mass severity`="severity"),
+                                                                    selected = "bi_rads")),
+                                               
+                                               fluidRow(selectInput(inputId = 'metric',
+                                                                    label = 'Select metric of stacked bar plot:',
+                                                                    choices = list(`Number of cases`='stack',
+                                                                                   `% of cases`="fill"),
+                                                                    selected = "stack"))
+                                  ),
+                                  
+                                  
+                                  mainPanel(width = 9, height = '200%', useShinyjs(),
+                                            
+                                            fluidRow(
+                                              plotlyOutput("benVSmagPlot", height = '850px')
+                                            )
+                                  )
+                                )),
+                                tabPanel(title = "Correlation matrix",
+                                         mainPanel(width = 12, height = "200%",
+                                                   plotlyOutput("CorrelationMatrix", height = '850px', width='auto'))
+                                         ))),
+                                
+                        tabItem(tabName = "Try",
+                                
+                                sidebarLayout(
+                                  
+                                  sidebarPanel(width=12, style = 'background-color: #E0ECE0',
+                                               h1("TRY NETWORK", align = 'center'),
+                                               h2("tutaj  jakis ladny tekscik ze uzytkownik sb moze wpisac wartosci imaginary albo prawdziwe i sb zobaczyc swoja diagnoze",
+                                                  align = 'center' )
+                                               
+                                  ),
+                                  mainPanel(width=12,
+                                  fluidRow(
+                                  box(width=6
+                                        ,fluidRow(column(5, align = 'center',
+                                                               numericInput(inputId = 'age',
+                                                                            label = "Patient's age",
+                                                                            value = 50,
+                                                                            min = 18)),
+                                                        column(5, offset=1, align = 'center',
+                                                               selectInput(inputId = 'shape',
+                                                                           label = 'Mass shape',
+                                                                           choices = c('round - 1' = 1, 'oval - 2' = 2, 'lobular - 3' = 3, 'irregular - 4' = 4)))),
+                                               
+                                               fluidRow(column(5, align = 'center',
+                                                               selectInput(inputId = 'margin',
+                                                                           label = 'Mass margin',
+                                                                           choices = c('circumscribed - 1' = 1, 'microlobulated - 2' = 2, 'obscured - 3' = 3, 'ill-defined - 4' = 4, 'spiculated - 5' = 5))),
+                                                        column(5, offset=1, align = 'center',
+                                                               selectInput(inputId = 'density',
+                                                                           label = 'Mass density',
+                                                                           choices = c('high - 1' = 1, 'iso - 2' = 2, 'low - 3' = 3, 'fat-containing - 4' = 4)))),
+                                               
+                                               
+                                               
+                                               fluidRow(column(style = 'padding: 10px',
+                                                               width = 12,
+                                                               align = 'center',
+                                                               actionButton(inputId = 'submit', label = "Sumbit", width = '300px', height = "200px" ,style = ' color: #fff; background-color: rgb(121, 180, 183); font-size:120%')))
+                                               # fluidRow(column(5, offset=8, actionButton(inputId = 'submit', label = "Sumbit", width = '200px', style = 'background-color: #D8E9E9')))
+                                               
+                                               
+                                               
+                                  ),
+                                  box(width=6,
+                                               fluidRow(column(10, offset = 1, align = 'center',
+                                                               selectInput(inputId = 'layers',
+                                                                           label = 'Number of hidden layers',
+                                                                           choices = c('1' = 1, '2' = 2),
+                                                                           selected = '2'))),
+                                               fluidRow(column(5, offset = 1, align = 'center',
+                                                               numericInput(inputId = 'first_layer',
+                                                                            label = 'Number of neurons in 1st layer',
+                                                                            value = 3,
+                                                                            min = 1,
+                                                                            max = 8, 
+                                                                            step = 1)),
+                                                        column(5, align = 'center',
+                                                               numericInput(inputId = 'second_layer',
+                                                                            label = 'Number of neurons in 2nd layer',
+                                                                            value = 3,
+                                                                            min = 1,
+                                                                            max = 8, 
+                                                                            step = 1))),
+                                               fluidRow(column(style = 'padding: 10px',
+                                                               width = 12,
+                                                               align = 'center',
+                                                               actionButton(inputId = 'retrain', label = "Rertain", width = '300px', height = "200px" ,style = 'color: #fff; background-color: rgb(121, 180, 183); font-size:120%')))
+                                               )),
+        
+                                
+                                fluidRow(
+                                  column(width = 12, valueBoxOutput('predictionValueBox', width = 12))
+                                )
+                                
+                        ))))))
+                      
 
 # Define server logic required to draw a histogram
 
-server <- function(input, output) {
-  # observeEvent(input$layers, {
-  #   toggleState(second_layer, condition = input$layers == 2)
-  # })
-  # 
+server <- function(input, output, session) {
+  observeEvent(input$layers, {
+    if(input$layers == 1){
+      disable('second_layer')
+    }
+    else {
+      enable('second_layer')
+    }
+    
+  })
+
   observeEvent(input$submit, {v <-c(input$age, as.numeric(input$shape), as.numeric(input$margin), as.numeric(input$density))
-  v2 <- c(input$first_layer, input$second_layer)
-  nn <- neuralnet(severity ~ age+shape+margin+density, data=data_stand,
-                  err.fct = "sse", hidden =v2 , act.fct = "logistic")
-  pred <-predict(nn, scale(t(v), center = scaled_centers, scale = scaled_scales))
+  pred <-round(predict(nn, scale(t(v), center = scaled_centers, scale = scaled_scales)), 2)
   if(pred>= 0.5) {
-    output$selected_var <- renderText({paste(pred, 'MALIGNANT')})
+    # diagnose <- paste("Your diagnose:" ,pred, 'MALIGNANT')
+    # session$sendCustomMessage("status-color", 'red')
+    vBox <- renderValueBox(valueBox(
+      pred, tags$p("Malignant", style='font-size: 150%'), icon = icon("alert", lib = "glyphicon", class="boxIcon"),
+      color = "red"
+    ))
   }
   else {
-    output$selected_var <- renderText({paste(pred, 'BENIGN')})
+    diagnose <- paste("Your diagnose:", pred, 'BENIGN')
+    # session$sendCustomMessage("status-color", 'green')
+    vBox <-  renderValueBox(valueBox(
+      pred, tags$p("Benign", style='font-size: 150%'), icon = icon("heartbeat", class="boxIcon"),
+      color = "green"
+    ))
   }
+    output$predictionValueBox <- vBox
+  })
+  
+  observeEvent(input$retrain, {
+  v2 <- c(input$first_layer, input$second_layer)
+  
+  withProgress(message="Retraining neural network...", value = 0.5, {
+    nn <- neuralnet(severity ~ age+shape+margin+density, data=data_stand,
+                  err.fct = "sse", hidden =v2 , act.fct = "logistic")
+    incProgress(0.45, message = "Neural network successfully retrained")
+    Sys.sleep(1)
+    incProgress(0.05)
+    })
+  
   })
   
   output$barPlot <- renderPlotly({
@@ -176,6 +288,35 @@ server <- function(input, output) {
     }
     
     ggplotly(p)
+  })
+  
+  output$CorrelationMatrix <- renderPlotly({
+    # Create a ggheatmap
+    ggheatmap <- ggplot(melted_cormat, aes(Var2, Var1, fill = value))+
+      geom_tile(color = "white")+
+      scale_fill_gradient2(low = "black", high = "firebrick2", mid = "dodgerblue4", 
+                           midpoint = 0, limit = c(-1,1), space = "Lab", 
+                           name="Pearson\nCorrelation") +
+      theme_minimal()+ # minimal theme
+      theme(axis.text.x = element_text(angle = 45, vjust = 1, 
+                                       size = 12, hjust = 1))+
+      theme(axis.text.y = element_text(size = 12)) + 
+      coord_fixed()
+    
+    ggplotly(ggheatmap + 
+      geom_text(aes(Var2, Var1, label = value), color = "white", size = 4) +
+      theme(
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank(),
+        axis.ticks = element_blank(),
+        legend.justification = c(1, 0),
+        legend.position = c(0.6, 0.7),
+        legend.direction = "horizontal")+
+      guides(fill = guide_colorbar(barwidth = 7, barheight = 1,
+                                   title.position = "top", title.hjust = 0.5)))
   })
 }
 

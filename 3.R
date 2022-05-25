@@ -1,5 +1,6 @@
 #--------------------------USTAWIENIE WD------------------------------------------------
-setwd("C:/Users/Admin/Studia/Semestr 6/PADR/R-main")
+#setwd("C:/Users/Admin/Studia/Semestr 6/PADR/R-main")
+setwd("C:/Users/aleks/OneDrive/Pulpit/sem6/PADR/R-main")
 #--------------------------ANALIZA DANYCH ITP-------------------------------------------
 #wczytanie danych
 data<-read.table("mammographic_masses.data", header=FALSE, sep=",");
@@ -133,3 +134,23 @@ data_factorized <- data.frame(bi_rads=factor(data_clean$bi_rads, levels=(0:6)),
                               margin=factor(data_clean$margin, labels = c("circumscribed", "microlobulated", "obscured", "ill-defined", "spiculated")),
                               density=factor(data_clean$density, labels = c("high", "iso", "low", "fat-containing")),
                               severity=factor(data_clean$severity, levels=c(1,0), labels= c("malignant", "benign")))
+
+sigmoid = function(x) {
+  1 / (1 + exp(-x))
+}
+x <- seq(-10, 10, 1)
+xx<-sigmoid(x)
+xx <- data.frame(xx)
+
+derivative = function(x) {
+  f = expression(1 / (1 + exp(-x)))
+  
+  d<-D(f,'x')
+}
+f = expression(1 / (1 + exp(-x)))
+d<-D(f,'x')
+x <- seq(-10, 10, 1)
+wynik <- eval(d)
+f = expression(1 / (1 + exp(-x)))
+
+d<-D(f,'x')

@@ -18,8 +18,8 @@ stackedBarPlotYLabs <- c(stack='Number of cases',
                          fill='% of cases')
 
 # Ladowanie danych obliczonych w pliku '2.R'
-#setwd("C:/Users/aleks/OneDrive/Pulpit/sem6/PADR/R-main")
-setwd("C:/Users/Admin/Studia/Semestr 6/PADR/R-main")
+setwd("C:/Users/aleks/OneDrive/Pulpit/sem6/PADR/R-main")
+#setwd("C:/Users/Admin/Studia/Semestr 6/PADR/R-main")
 source("3.R")
 
 # Define UI for application that draws a histogram
@@ -127,7 +127,27 @@ tags$script("
                                 tabPanel(title = "Correlation matrix",
                                          mainPanel(width = 12, height = "200%",
                                                    plotlyOutput("CorrelationMatrix", height = '850px', width='auto'))
-                                         ))),
+                                         ),
+                                
+                                tabPanel(title = "Neural network structure",
+                                         fluidRow(style="padding: 20px",sidebarPanel(width = 5,
+                                                               strong("MLP Structure", align="left",
+                                                                  style="font-size:250%; font-family: 'arial'"),
+                                                               br(),
+                                                               br(),
+                                                               p("Multilayer perceptron used for malignancy prediction of a tumor detected in mammography, has a presented structure.", style="font-size:120%; font-family: 'arial'"),
+                                                               br(),
+                                                               p("It consists of: ", style="font-size:120%; font-family: 'arial'"),
+                                                               p("- ", strong("Input layer"), "with 4 neurons,", style="font-size:120%; font-family: 'arial'"),
+                                                               p("- One ", strong("hidden layer"), "with 2 neurons,", style="font-size:120%; font-family: 'arial'"),
+                                                               p("- ", strong("Output layer"), "with 1 neuron representing mass severity.", style="font-size:120%; font-family: 'arial'"),
+                                                               p("As an output, neural network returns value from the range (0,1). A number smaller than a treshold = 0.5 is considered as benign, while a number bigger or equal to 0.5 - as a malignant tumor.", style="font-size:120%; font-family: 'arial'"),
+                                                               br(),
+                                                               p("Results from a agiven range are provided by the activation function - ", strong("unipolar sigmoid function."), style="font-size:120%; font-family: 'arial'")),
+                                                              
+                                                  mainPanel(width = 7,offset = 2, img(src = "/MLP.png", height = 500, width = 700, align = "center"))),
+                                         fluidRow(plotlyOutput("sigmoide"))
+                                        ))),
                                 
                         tabItem(tabName = "Try",
                                 
@@ -317,6 +337,31 @@ server <- function(input, output, session) {
         legend.direction = "horizontal")+
       guides(fill = guide_colorbar(barwidth = 7, barheight = 1,
                                    title.position = "top", title.hjust = 0.5)))
+  })
+  
+  output$sigmoide <- renderPlotly({
+    sigmoid = function(x) {
+      1 / (1 + exp(-x))
+    }
+    x <- seq(-10, 10, 0.1)
+    xx<-sigmoid(x)
+    xxx <- data.frame(xx)
+    
+    f = expression(1 / (1 + exp(-x)))
+    d<-D(f,'x')
+    x <- seq(-10, 10, 0.1)
+    wynik <- eval(d)
+    melted_data <- data.frame(x = x, y1 = xx, y2 = wynik)
+    
+    p <- ggplot(melted_data, aes(x=x)) +
+      geom_line(aes(y=y1), colour = '#79B4B7', size = 1) +
+      geom_line(aes(y=y2), colour = 'green', linetype = 'dashed', color = '#DEEF99') +
+      ggtitle("Unipolar sigmoide" ) +
+      theme_minimal() +
+      theme(plot.title = element_text(size = 20, face = "bold", family = "arial"))
+    
+
+    ggplotly(p)
   })
 }
 

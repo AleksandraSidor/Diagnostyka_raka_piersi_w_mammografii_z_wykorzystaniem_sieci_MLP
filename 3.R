@@ -77,12 +77,35 @@ data_stand <- data.frame(age=s[,1], shape=s[,2], margin=s[,3], density=s[,4], da
 #----------------SIEC NEURONOWA----------------------------------------
 ## na razie na calosci zbioru, bez podzialu na treningowy i testowy
 
+
+library(rpart)
+library(caret)
 require(neuralnet)
 
-## 2 warstwy ukryte, funkcja aktywacji=sigmoid, funkcja straty=SSE
-nn <- neuralnet(severity ~ age+shape+margin+density, data=data_stand,
-                err.fct = "sse", hidden = 2, act.fct = "logistic")
+#podzia³ na zbior treningnowy i testowy
+#sev <- unlist(data_clean['severity'])
+sev <- data_clean$severity
+set.seed(100)
+part <- createDataPartition(sev, p = 0.8, list  = FALSE)
 
+training_set <- data_stand[part, ]
+testing_set <- data_stand[-part, ]
+
+training_sev <-sev[part]
+testing_sev <-sev[-part]
+
+testing_s <- s[-part, ]
+scaled_centers <- attr(testing_s, 'scaled:center')
+scaled_scales <- attr(testing_s, 'scaled:scale')
+
+tr_s <- s[part, ] 
+data_stand_tr <- data.frame(age=tr_s[,1], shape=tr_s[,2], margin=tr_s[,3], density=tr_s[,4], training_sev)
+
+## 2 warstwy ukryte, funkcja aktywacji=sigmoid, funkcja straty=SSE
+nn <- neuralnet(training_sev ~ age+shape+margin+density, data=data_stand_tr,
+                err.fct = "sse", hidden = 2, act.fct = "logistic")
+plot(nn)
+pred <-round(predict(nn, scale(testing_set[, 1:4], center = scaled_centers, scale = scaled_scales)), 2)
 
 predsVStarget <- data.frame(case=rownames(data_stand),
                             predictions=factor(round(unlist(nn$net.result), digits = 0), labels = c('benign', 'malignant')),

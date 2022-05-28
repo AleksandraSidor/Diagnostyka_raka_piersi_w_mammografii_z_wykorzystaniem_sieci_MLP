@@ -240,7 +240,12 @@ server <- function(input, output, session) {
   })
 
   observeEvent(input$submit, {v <-c(input$age, as.numeric(input$shape), as.numeric(input$margin), as.numeric(input$density))
+  # scaled_centers <- attr(v, 'scaled:center')
+  # scaled_scales <- attr(v, 'scaled:scale')
+  # scaled_centers
+  # v_s <- scale(v, center = scaled_centers, scale = scaled_scales)
   pred <-round(predict(nn, scale(t(v), center = scaled_centers, scale = scaled_scales)), 2)
+  
   if(pred>= 0.5) {
     # diagnose <- paste("Your diagnose:" ,pred, 'MALIGNANT')
     # session$sendCustomMessage("status-color", 'red')
@@ -264,8 +269,9 @@ server <- function(input, output, session) {
   v2 <- c(input$first_layer, input$second_layer)
   
   withProgress(message="Retraining neural network...", value = 0.5, {
-    nn <- neuralnet(severity ~ age+shape+margin+density, data=data_stand,
-                  err.fct = "sse", hidden =v2 , act.fct = "logistic")
+    nn <- neuralnet(training_sev ~ age+shape+margin+density, data=data_stand_tr,
+                    err.fct = "sse", hidden = 2, act.fct = "logistic")
+    
     incProgress(0.45, message = "Neural network successfully retrained")
     Sys.sleep(1)
     incProgress(0.05)

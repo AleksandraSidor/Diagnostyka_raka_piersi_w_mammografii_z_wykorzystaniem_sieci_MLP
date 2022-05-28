@@ -94,22 +94,24 @@ testing_set <- data_stand[-part, ]
 training_sev <-sev[part]
 testing_sev <-sev[-part]
 
-testing_s <- s[-part, ]
-scaled_centers <- attr(testing_s, 'scaled:center')
-scaled_scales <- attr(testing_s, 'scaled:scale')
 
-tr_s <- s[part, ] 
+tr_s <- scale(s[part, ]) 
+scaled_centers <- attr(tr_s, 'scaled:center')
+scaled_scales <- attr(tr_s, 'scaled:scale')
+testing_s <- scale(s[-part, ], center = scaled_centers, scale = scaled_scales)
+
+
 data_stand_tr <- data.frame(age=tr_s[,1], shape=tr_s[,2], margin=tr_s[,3], density=tr_s[,4], training_sev)
 
 ## 2 warstwy ukryte, funkcja aktywacji=sigmoid, funkcja straty=SSE
 nn <- neuralnet(training_sev ~ age+shape+margin+density, data=data_stand_tr,
                 err.fct = "sse", hidden = 2, act.fct = "logistic")
 plot(nn)
-pred <-round(predict(nn, scale(testing_set[, 1:4], center = scaled_centers, scale = scaled_scales)), 2)
+pred <-round(predict(nn, scale(testing_s[, 1:4], center = scaled_centers, scale = scaled_scales)), 2)
 
-predsVStarget <- data.frame(case=rownames(data_stand),
+predsVStarget <- data.frame(case=rownames(data_stand_tr),
                             predictions=factor(round(unlist(nn$net.result), digits = 0), labels = c('benign', 'malignant')),
-                            target=factor(data_stand$severity, labels = c('benign', 'malignant')))
+                            target=factor(data_stand_tr$training_sev, labels = c('benign', 'malignant')))
 
 ## Macierz pomylek
 require(caret)

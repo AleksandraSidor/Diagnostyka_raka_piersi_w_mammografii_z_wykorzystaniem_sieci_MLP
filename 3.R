@@ -109,13 +109,18 @@ nn <- neuralnet(training_sev ~ age+shape+margin+density, data=data_stand_tr,
 plot(nn)
 pred <-round(predict(nn, scale(testing_s[, 1:4], center = scaled_centers, scale = scaled_scales)), 2)
 
-predsVStarget <- data.frame(case=rownames(data_stand_tr),
+predsVStarget_tr <- data.frame(case=rownames(data_stand_tr),
                             predictions=factor(round(unlist(nn$net.result), digits = 0), labels = c('benign', 'malignant')),
                             target=factor(data_stand_tr$training_sev, labels = c('benign', 'malignant')))
 
+predsVStarget_ts <-data.frame(case = rownames(testing_s), 
+                             predictions=factor(round(pred, digits = 0), labels = c('benign', 'malignant')),
+                             target = factor(testing_sev, labels = c('benign', 'malignant')))
+
 ## Macierz pomylek
 require(caret)
-confMatrix <- confusionMatrix(data=predsVStarget$predictions, reference=predsVStarget$target, positive = "malignant")
+confMatrix_tr <- confusionMatrix(data=predsVStarget_tr$predictions, reference=predsVStarget_tr$target, positive = "malignant")
+confMatrix_ts <- confusionMatrix(data=predsVStarget_ts$predictions, reference=predsVStarget_ts$target, positive = "malignant")
 
 # Faktoryzacja danych w data_clean na konkretne labele
 # margin: [1,2,3,4,5] -> ["circumscribed", "microlobulated", "obscured", "ill-defined", "spiculated"]
@@ -159,6 +164,13 @@ data_factorized <- data.frame(bi_rads=factor(data_clean$bi_rads, levels=(0:6)),
                               margin=factor(data_clean$margin, labels = c("circumscribed", "microlobulated", "obscured", "ill-defined", "spiculated")),
                               density=factor(data_clean$density, labels = c("high", "iso", "low", "fat-containing")),
                               severity=factor(data_clean$severity, levels=c(1,0), labels= c("malignant", "benign")))
+
+
+
+
+
+
+
 
 sigmoid = function(x) {
   1 / (1 + exp(-x))

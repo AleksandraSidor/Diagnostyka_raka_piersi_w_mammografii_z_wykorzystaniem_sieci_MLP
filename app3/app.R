@@ -18,8 +18,8 @@ stackedBarPlotYLabs <- c(stack='Number of cases',
                          fill='% of cases')
 
 # Ladowanie danych obliczonych w pliku '2.R'
-setwd("C:/Users/aleks/OneDrive/Pulpit/sem6/PADR/R-main")
-#setwd("C:/Users/Admin/Studia/Semestr 6/PADR/R-main")
+#setwd("C:/Users/aleks/OneDrive/Pulpit/sem6/PADR/R-main")
+setwd("C:/Users/Admin/Studia/Semestr 6/PADR/R-main")
 source("3.R")
 
 # Define UI for application that draws a histogram
@@ -28,13 +28,14 @@ ui <- dashboardPage(skin = "green",
                     dashboardSidebar(
                       sidebarMenu(style = 'background-color: #FFFFFF',
                                   menuItem("Overview", tabName = "Overview", icon = icon('table', class = 'menu_icon')),
-                                  menuItem("Neural network", tabName = "Try", icon = icon('magic', class = 'menu_icon'))
+                                  menuItem("Control panel", tabName = "Try", icon = icon('magic', class = 'menu_icon'))
                       )
                     ),
                     dashboardBody(tags$head(tags$style(HTML('
 .skin-green {
   background-color: rgb(121, 180, 183);
 }
+
 
 .skin-green .main-header .logo {
   background-color: rgb(121, 180, 183);
@@ -80,7 +81,35 @@ ui <- dashboardPage(skin = "green",
 }
 
 .small-box {
+  height: 150px;
+  overflow: hidden;
+}
+
+.small-box.bg-green { 
+  background-color: #c8f5b0 !important;
+  color: rgba(0,0,0,0.5) !important;
   height: 200px;
+}
+
+.small-box.bg-red { 
+  background-color: #EEB0B0 !important;
+  color: rgba(0,0,0,0.5) !important;
+  height: 200px;
+}
+
+.small-box.bg-blue {
+  background-color: #DEF3F4!important;
+  color: rgba(0,0,0,0.5) !important
+}
+
+.small-box.bg-olive {
+  background-color: #E0EFD8 !important;
+  color: rgba(0,0,0,0.5) !important
+}
+
+.small-box.bg-purple {
+  background-color: #C0D1E8 !important;
+  color: rgba(0,0,0,0.5) !important;
 }
 
 .boxIcon {
@@ -95,7 +124,7 @@ tags$script("
     "),
                       tabItems(
                         tabItem(tabName = "Overview", style = 'background-color: #FFFFFF',
-                                tabBox(title="Dataset analysis panel", width="100%", height="100%", 
+                                tabBox(title="Overview panel", width="100%", height="100%", 
                                        tabPanel(title = "Histograms",
                                 sidebarLayout(
                                   sidebarPanel(width = 3,
@@ -124,7 +153,7 @@ tags$script("
                                             )
                                   )
                                 )),
-                                tabPanel(title = "Correlation matrix",
+                                tabPanel(title = "Feature correlation matrix",
                                          mainPanel(width = 12, height = "200%",
                                                    plotlyOutput("CorrelationMatrix", height = '850px', width='auto'))
                                          ),
@@ -153,10 +182,10 @@ tags$script("
                                 
                                 sidebarLayout(
                                   
-                                  sidebarPanel(width=12, style = 'background-color: #E0ECE0',
-                                               h1("TRY NETWORK", align = 'center'),
-                                               h2("tutaj  jakis ladny tekscik ze uzytkownik sb moze wpisac wartosci imaginary albo prawdziwe i sb zobaczyc swoja diagnoze",
-                                                  align = 'center' )
+                                  sidebarPanel(width=12, style = 'background-color: white; border-color: #D3D3D3; border-bottom: 3px solid rgb(121, 180, 183); border-top: 3px solid rgb(121, 180, 183); border-left:0px solid white; border-right: 0px solid white; margin-bottom: 40px',
+                                               h1(strong("Neural network control panel"), align = "center", style = "font-family: 'Inria Magic', sans-serif; color: rgba(0,0,0,0.7);"),
+                                               h3("Use the panel on the left to enter your own mass measurements and hit 'Submit' to see it's severity prediction. Use the panel on the right to change the structure of the neural network and hit 'Retrain' to apply.",
+                                                  align = 'center', style="color: rgba(0,0,0,0.5)")
                                                
                                   ),
                                   mainPanel(width=12,
@@ -186,8 +215,8 @@ tags$script("
                                                fluidRow(column(style = 'padding: 10px',
                                                                width = 12,
                                                                align = 'center',
-                                                               actionButton(inputId = 'submit', label = "Sumbit", width = '300px', height = "200px" ,style = ' color: #fff; background-color: rgb(121, 180, 183); font-size:120%')))
-                                               # fluidRow(column(5, offset=8, actionButton(inputId = 'submit', label = "Sumbit", width = '200px', style = 'background-color: #D8E9E9')))
+                                                               actionButton(inputId = 'submit', label = "Submit", width = '300px', height = "200px" ,style = ' color: #fff; background-color: rgb(121, 180, 183); font-size:120%')))
+                                               
                                                
                                                
                                                
@@ -215,20 +244,41 @@ tags$script("
                                                fluidRow(column(style = 'padding: 10px',
                                                                width = 12,
                                                                align = 'center',
-                                                               actionButton(inputId = 'retrain', label = "Rertain", width = '300px', height = "200px" ,style = 'color: #fff; background-color: rgb(121, 180, 183); font-size:120%')))
+                                                               actionButton(inputId = 'retrain', label = "Retrain", width = '300px', height = "200px" ,style = 'color: #fff; background-color: rgb(121, 180, 183); font-size:120%')))
                                                )),
         
                                 
-                                fluidRow(
-                                  column(width = 12, valueBoxOutput('predictionValueBox', width = 12))
-                                )
                                 
+                                fluidRow(valueBoxOutput('accuracyValueBox'),
+                                         valueBoxOutput('sensitivityValueBox'),
+                                         valueBoxOutput('specificityValueBox')
+                                ),
+                          
+                                fluidRow(
+                                  column(valueBoxOutput('predictionValueBox', width = 12), width = 8, offset = 2)
+                                )
                         ))))))
                       
 
 # Define server logic required to draw a histogram
 
 server <- function(input, output, session) {
+  
+  output$accuracyValueBox <- renderValueBox(valueBox(
+    paste(round(confMatrix_ts$overall['Accuracy']*100, 2), "%"), tags$p("Accuracy", style='font-size: 150%'), icon = icon("bullseye", class="boxIcon"),
+    color = "blue"
+  ))
+  
+  output$sensitivityValueBox <- renderValueBox(valueBox(
+    paste(round(confMatrix_ts$byClass['Sensitivity']*100, 2), "%"), tags$p("Sensitivity", style='font-size: 150%'), icon = icon("eye", class="boxIcon"),
+    color = "olive"
+  ))
+  
+  output$specificityValueBox <- renderValueBox(valueBox(
+    paste(round(confMatrix_ts$byClass['Specificity']*100, 2), "%"), tags$p("Specificity", style='font-size: 150%'), icon = icon("virus-slash", class="boxIcon"),
+    color = "purple"
+  ))
+  
   observeEvent(input$layers, {
     if(input$layers == 1){
       disable('second_layer')
@@ -271,13 +321,37 @@ server <- function(input, output, session) {
   v2 <- c(input$first_layer, input$second_layer)
   
   withProgress(message="Retraining neural network...", value = 0.5, {
-    nn <- neuralnet(training_sev ~ age+shape+margin+density, data=data_stand_tr,
+    nn <<- neuralnet(training_sev ~ age+shape+margin+density, data=data_stand_tr,
                     err.fct = "sse", hidden = v2, act.fct = "logistic")
     
     incProgress(0.45, message = "Neural network successfully retrained")
     Sys.sleep(1)
     incProgress(0.05)
     })
+  
+  pred <-round(predict(nn, scale(testing_set, center = scaled_centers, scale = scaled_scales)), 2)
+  
+  predsVStarget_ts <-data.frame(case = rownames(testing_set), 
+                                predictions=factor(round(pred, digits = 0), labels = c('benign', 'malignant')),
+                                target = factor(data_ts$testing_sev, labels = c('benign', 'malignant')))
+  
+  confMatrix_tr <- confusionMatrix(data=predsVStarget_tr$predictions, reference=predsVStarget_tr$target, positive = "malignant")
+  confMatrix_ts <- confusionMatrix(data=predsVStarget_ts$predictions, reference=predsVStarget_ts$target, positive = "malignant")
+  
+  output$accuracyValueBox <- renderValueBox(valueBox(
+    paste(round(confMatrix_ts$overall['Accuracy']*100, 2), "%"), tags$p("Accuracy", style='font-size: 150%'), icon = icon("bullseye", class="boxIcon"),
+    color = "blue"
+  ))
+  
+  output$sensitivityValueBox <- renderValueBox(valueBox(
+    paste(round(confMatrix_ts$byClass['Sensitivity']*100, 2), "%"), tags$p("Sensitivity", style='font-size: 150%'), icon = icon("eye", class="boxIcon"),
+    color = "olive"
+  ))
+  
+  output$specificityValueBox <- renderValueBox(valueBox(
+    paste(round(confMatrix_ts$byClass['Specificity']*100, 2), "%"), tags$p("Specificity", style='font-size: 150%'), icon = icon("virus-slash", class="boxIcon"),
+    color = "purple"
+  ))
   
   })
   

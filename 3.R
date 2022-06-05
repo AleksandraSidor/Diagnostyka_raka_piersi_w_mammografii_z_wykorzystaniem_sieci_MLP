@@ -1,6 +1,6 @@
 #--------------------------USTAWIENIE WD------------------------------------------------
-#setwd("C:/Users/Admin/Studia/Semestr 6/PADR/R-main")
-setwd("C:/Users/aleks/OneDrive/Pulpit/sem6/PADR/R-main")
+setwd("C:/Users/Admin/Studia/Semestr 6/PADR/R-main")
+#setwd("C:/Users/aleks/OneDrive/Pulpit/sem6/PADR/R-main")
 #--------------------------ANALIZA DANYCH ITP-------------------------------------------
 #wczytanie danych
 data<-read.table("mammographic_masses.data", header=FALSE, sep=",");

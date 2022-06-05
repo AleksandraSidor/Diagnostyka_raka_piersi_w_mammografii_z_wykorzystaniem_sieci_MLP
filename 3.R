@@ -84,43 +84,43 @@ require(neuralnet)
 
 #podzia³ na zbior treningnowy i testowy
 #sev <- unlist(data_clean['severity'])
+
+
 sev <- data_clean$severity
 set.seed(100)
 part <- createDataPartition(sev, p = 0.8, list  = FALSE)
 
-training_set <- data_stand[part, ]
-testing_set <- data_stand[-part, ]
+training_set <- scale(data_clean[part, 2:5])
+scaled_centers <- attr(training_set, 'scaled:center')
+scaled_scales <- attr(training_set, 'scaled:scale')
+
+testing_set <- data_clean[-part, 2:5]
 
 training_sev <-sev[part]
 testing_sev <-sev[-part]
 
 
-tr_s <- scale(s[part, ]) 
-scaled_centers <- attr(tr_s, 'scaled:center')
-scaled_scales <- attr(tr_s, 'scaled:scale')
-testing_s <- scale(s[-part, ], center = scaled_centers, scale = scaled_scales)
 
+data_stand_tr <- data.frame(age=training_set[,1], shape=training_set[,2], margin=training_set[,3], density=training_set[,4], training_sev)
+data_ts <- data.frame(age=testing_set[,1], shape=testing_set[,2], margin=testing_set[,3], density=testing_set[,4], testing_sev)
 
-data_stand_tr <- data.frame(age=tr_s[,1], shape=tr_s[,2], margin=tr_s[,3], density=tr_s[,4], training_sev)
-
-## 2 warstwy ukryte, funkcja aktywacji=sigmoid, funkcja straty=SSE
 nn <- neuralnet(training_sev ~ age+shape+margin+density, data=data_stand_tr,
                 err.fct = "sse", hidden = 2, act.fct = "logistic")
-plot(nn)
-pred <-round(predict(nn, scale(testing_s[, 1:4], center = scaled_centers, scale = scaled_scales)), 2)
 
 predsVStarget_tr <- data.frame(case=rownames(data_stand_tr),
-                            predictions=factor(round(unlist(nn$net.result), digits = 0), labels = c('benign', 'malignant')),
-                            target=factor(data_stand_tr$training_sev, labels = c('benign', 'malignant')))
+                               predictions=factor(round(unlist(nn$net.result), digits = 0), labels = c('benign', 'malignant')),
+                               target=factor(data_stand_tr$training_sev, labels = c('benign', 'malignant')))
 
-predsVStarget_ts <-data.frame(case = rownames(testing_s), 
-                             predictions=factor(round(pred, digits = 0), labels = c('benign', 'malignant')),
-                             target = factor(testing_sev, labels = c('benign', 'malignant')))
+pred <-round(predict(nn, scale(testing_set, center = scaled_centers, scale = scaled_scales)), 2)
 
-## Macierz pomylek
-require(caret)
+predsVStarget_ts <-data.frame(case = rownames(testing_set), 
+                              predictions=factor(round(pred, digits = 0), labels = c('benign', 'malignant')),
+                              target = factor(data_ts$testing_sev, labels = c('benign', 'malignant')))
+
 confMatrix_tr <- confusionMatrix(data=predsVStarget_tr$predictions, reference=predsVStarget_tr$target, positive = "malignant")
 confMatrix_ts <- confusionMatrix(data=predsVStarget_ts$predictions, reference=predsVStarget_ts$target, positive = "malignant")
+
+
 
 # Faktoryzacja danych w data_clean na konkretne labele
 # margin: [1,2,3,4,5] -> ["circumscribed", "microlobulated", "obscured", "ill-defined", "spiculated"]

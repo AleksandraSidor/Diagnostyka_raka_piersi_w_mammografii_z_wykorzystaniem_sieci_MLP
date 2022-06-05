@@ -243,22 +243,24 @@ server <- function(input, output, session) {
   # scaled_centers <- attr(v, 'scaled:center')
   # scaled_scales <- attr(v, 'scaled:scale')
   # scaled_centers
-  # v_s <- scale(v, center = scaled_centers, scale = scaled_scales)
-  pred <-round(predict(nn, scale(t(v), center = scaled_centers, scale = scaled_scales)), 2)
+   #v_s <- scale(t(v), center = scaled_centers[2:5], scale = scaled_scales[2:5])
+   
   
-  if(pred>= 0.5) {
-    # diagnose <- paste("Your diagnose:" ,pred, 'MALIGNANT')
+  pred1 <-round(predict(nn, scale(t(v), center = scaled_centers, scale = scaled_scales)), 2)
+  
+  if(pred1>= 0.5) {
+    # diagnose <- paste("Your diagnose:" ,pred1, 'MALIGNANT')
     # session$sendCustomMessage("status-color", 'red')
     vBox <- renderValueBox(valueBox(
-      pred, tags$p("Malignant", style='font-size: 150%'), icon = icon("alert", lib = "glyphicon", class="boxIcon"),
+      pred1, tags$p("Malignant", style='font-size: 150%'), icon = icon("alert", lib = "glyphicon", class="boxIcon"),
       color = "red"
     ))
   }
   else {
-    diagnose <- paste("Your diagnose:", pred, 'BENIGN')
+    #diagnose <- paste("Your diagnose:", pred1, 'BENIGN')
     # session$sendCustomMessage("status-color", 'green')
     vBox <-  renderValueBox(valueBox(
-      pred, tags$p("Benign", style='font-size: 150%'), icon = icon("heartbeat", class="boxIcon"),
+      pred1, tags$p("Benign", style='font-size: 150%'), icon = icon("heartbeat", class="boxIcon"),
       color = "green"
     ))
   }
@@ -270,7 +272,7 @@ server <- function(input, output, session) {
   
   withProgress(message="Retraining neural network...", value = 0.5, {
     nn <- neuralnet(training_sev ~ age+shape+margin+density, data=data_stand_tr,
-                    err.fct = "sse", hidden = 2, act.fct = "logistic")
+                    err.fct = "sse", hidden = v2, act.fct = "logistic")
     
     incProgress(0.45, message = "Neural network successfully retrained")
     Sys.sleep(1)

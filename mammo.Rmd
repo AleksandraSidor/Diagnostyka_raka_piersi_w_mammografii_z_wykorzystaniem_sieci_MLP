@@ -15,7 +15,7 @@ data<-read.table("mammographic_masses.data", header=FALSE, sep=",");
 colnames(data) <- c('bi_rads', 'age', 'shape', 'margin', 'density', 'severity')
 
 
-nan_data <- which(data=='?'); #indeksy danych niekompletnych w calym zbiorze (bez sensu bo pokazuje indeksy jakby data bylo wektorem)
+nan_data <- which(data=='?');
 new_data <- replace(data, data=='?', NA); #zamiana ? na NA
 new_data <- as.data.frame(lapply(new_data,as.numeric)) # konwersja wszystkich wartosci w dataframie na numeric
 

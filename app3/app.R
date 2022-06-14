@@ -15,11 +15,11 @@ library(shinyjs)
 status <- reactiveVal();
 
 stackedBarPlotYLabs <- c(stack='Number of cases',
-                         fill='% of cases')
+                         fill='Fraction of cases')
 
 # Ladowanie danych obliczonych w pliku '3.R'
-setwd("C:/Users/aleks/OneDrive/Pulpit/sem6/PADR/R-main")
-#setwd("C:/Users/Admin/Studia/Semestr 6/PADR/R-main")
+#setwd("C:/Users/aleks/OneDrive/Pulpit/sem6/PADR/R-main")
+setwd("C:/Users/Admin/Studia/Semestr 6/PADR/R-main")
 source("3.R")
 
 # Define UI for application that draws a histogram
@@ -141,7 +141,7 @@ tags$script("
                                                fluidRow(selectInput(inputId = 'metric',
                                                                     label = 'Select metric of stacked bar plot:',
                                                                     choices = list(`Number of cases`='stack',
-                                                                                   `% of cases`="fill"),
+                                                                                   `Fraction of cases`="fill"),
                                                                     selected = "stack"))
                                   ),
                                   

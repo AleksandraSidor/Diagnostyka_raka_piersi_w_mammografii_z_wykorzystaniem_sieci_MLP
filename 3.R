@@ -1,6 +1,6 @@
 #--------------------------USTAWIENIE WD------------------------------------------------
-setwd("C:/Users/Admin/Studia/Semestr 6/PADR/R-main")
-#setwd("C:/Users/aleks/OneDrive/Pulpit/sem6/PADR/R-main")
+#setwd("C:/Users/Admin/Studia/Semestr 6/PADR/R-main")
+setwd("C:/Users/aleks/OneDrive/Pulpit/sem6/PADR/R-main")
 #--------------------------ANALIZA DANYCH ITP-------------------------------------------
 #wczytanie danych
 data<-read.table("mammographic_masses.data", header=FALSE, sep=",");
@@ -66,8 +66,7 @@ density_benVSmag <- t(prop.table(table(data_clean[c('density', 'severity')]), 1)
 # do zakresu [-1;1] (z wyj1tkiem severity)
 
 s <- scale(data_clean[,2:5])
-# ??rednie i odchylenia standardowe u??yte do standaryzacji s1 zapamietywane
-# w celu pó??niejszej standaryzacji danych wprowadzanych przez u??ytkownika
+
 scaled_centers <- attr(s, 'scaled:center')
 scaled_scales <- attr(s, 'scaled:scale')
 

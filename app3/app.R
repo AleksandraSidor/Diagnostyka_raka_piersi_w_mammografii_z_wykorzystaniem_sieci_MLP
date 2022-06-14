@@ -17,9 +17,9 @@ status <- reactiveVal();
 stackedBarPlotYLabs <- c(stack='Number of cases',
                          fill='% of cases')
 
-# Ladowanie danych obliczonych w pliku '2.R'
-#setwd("C:/Users/aleks/OneDrive/Pulpit/sem6/PADR/R-main")
-setwd("C:/Users/Admin/Studia/Semestr 6/PADR/R-main")
+# Ladowanie danych obliczonych w pliku '3.R'
+setwd("C:/Users/aleks/OneDrive/Pulpit/sem6/PADR/R-main")
+#setwd("C:/Users/Admin/Studia/Semestr 6/PADR/R-main")
 source("3.R")
 
 # Define UI for application that draws a histogram

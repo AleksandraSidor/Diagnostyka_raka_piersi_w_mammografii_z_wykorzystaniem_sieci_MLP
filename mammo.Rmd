@@ -34,32 +34,32 @@ Histogramy dla poszczególnych cech w zbiorze danych:
 ```{r dirty_data_analysis, echo=TRUE}
 #-------------------------histogramy pierwsze---------------------
 
-bi_rads_h <- hist(new_data$bi_rads, main="Ocena BI-RADS", xlab="Wartosc", ylab="Ilosc wystapien", xlim=c(0,max(new_data$bi_rads, na.rm = TRUE)), ylim=c(0, 600), breaks=56, col="#9ACD32")
+bi_rads_h <- hist(new_data$bi_rads, main="Ocena BI-RADS", xlab="Wartosc", ylab="Ilosc wystapien", xlim=c(0,max(new_data$bi_rads, na.rm = TRUE)), ylim=c(0, 600), breaks=56, col=featureColors['bi_rads'])
 
 zero = which(bi_rads_h$counts == 0)
 text(bi_rads_h$mids[-zero],bi_rads_h$counts[-zero],labels=bi_rads_h$counts[-zero], adj=c(0.5, -0.5))
 
-age_h <- hist(new_data$age, main="Wiek pacjentki (w latach)", xlab="Wiek", ylab="Ilosc wystapien", xlim=c(0,100), breaks=99, col="#F08080")
+age_h <- hist(new_data$age, main="Wiek pacjentki (w latach)", xlab="Wiek", ylab="Ilosc wystapien", xlim=c(0,100), breaks=99, col=featureColors['age'])
 
 
-shape_h <- hist(new_data$shape, main="Ksztalt guza", xlab="Ksztalt", ylab="Ilosc wystapien", xlim=c(0,4), ylim=c(0, 450), breaks=0:4, col="#B0E0E6", xaxt="n")
+shape_h <- hist(new_data$shape, main="Ksztalt guza", xlab="Ksztalt", ylab="Ilosc wystapien", xlim=c(0,4), ylim=c(0, 450), breaks=0:4, col=featureColors['shape'], xaxt="n")
 text(shape_h$mids,shape_h$counts,labels=shape_h$counts, adj=c(0.5, -0.5))
 axis(1, shape_h$mids, c("round", "oval", "lobular", "irregular"), line=-1, lwd=0, lwd.ticks = 1)
 
 
-margin_h <- hist(new_data$margin, main="Margines guza", xlab="Margines", ylab="Ilosc wystapien", xlim=c(0,max(new_data$margin, na.rm = TRUE)), ylim=c(0, 400), breaks=0:5, col="#DEB887", xaxt="n")
+margin_h <- hist(new_data$margin, main="Margines guza", xlab="Margines", ylab="Ilosc wystapien", xlim=c(0,max(new_data$margin, na.rm = TRUE)), ylim=c(0, 400), breaks=0:5, col=featureColors['margin'], xaxt="n")
 text(margin_h$mids,margin_h$counts,labels=margin_h$counts, adj=c(0.5, -0.5))
 axis(1, at=margin_h$mids, labels = rep_len("", length(margin_h$mids)), lwd=0, lwd.ticks = 1, line = -1)
 text(margin_h$mids, par("usr")[3] - 0.2, labels = c("circumscribed", "microlobulated", "obscured", "ill-defined", "spiculated"),
      srt = 35, pos = 1, xpd = TRUE)
 
 
-density_h <- hist(new_data$density, main="Gestosc guza", xlab="Gestosc guza", ylab="Ilosc wystapien", xlim=c(0,max(new_data$density, na.rm = TRUE)), ylim=c(0, 850), breaks=0:4, col="#BA55D3", xaxt="n")
+density_h <- hist(new_data$density, main="Gestosc guza", xlab="Gestosc guza", ylab="Ilosc wystapien", xlim=c(0,max(new_data$density, na.rm = TRUE)), ylim=c(0, 850), breaks=0:4, col=featureColors['density'], xaxt="n")
 text(density_h$mids,density_h$counts,labels=density_h$counts, adj=c(0.5, -0.5))
 axis(1, density_h$mids, c("high", "iso", "low", "fat-containing"), line=-1, lwd=0, lwd.ticks = 1)
 
 
-severity_h <- hist(new_data$severity, right=F, main="Stopien zaawansowania guza", xlab="Zlosliwosc", ylab="Ilosc wystapien", xlim=c(0,1), ylim = c(0,600), breaks=2, col="#66CDAA", xaxt="n")
+severity_h <- hist(new_data$severity, right=F, main="Stopien zaawansowania guza", xlab="Zlosliwosc", ylab="Ilosc wystapien", xlim=c(0,1), ylim = c(0,600), breaks=2, col=featureColors['severity'], xaxt="n")
 text(severity_h$mids,severity_h$counts,labels=severity_h$counts, adj=c(0.5, -0.5))
 axis(1, severity_h$mids, c("benign", "malignant"), line=-1, lwd=0, lwd.ticks = 1)
 ```
@@ -113,30 +113,31 @@ data_clean$bi_rads[data_clean$bi_rads==55] <- 5
 ```{r clean_data_analysis}
 #-------------------------histogramy po czyszczeniu---------------------
 
-bi_rads_new_h <- hist(data_clean$bi_rads, main="Ocena BI-RADS", xlab="Wartosc", ylab="Ilosc wystapien", xlim=c(0,max(data_clean$bi_rads, na.rm = TRUE)), ylim=c(0, 500), breaks=5, col="#9ACD32", xaxt="n")
+bi_rads_new_h <- hist(data_clean$bi_rads, main="Ocena BI-RADS", xlab="Wartosc", ylab="Ilosc wystapien", xlim=c(0,6), ylim=c(0, 500), breaks=-0.5:6.5, col=featureColors['bi_rads'], xaxt="n")
 text(bi_rads_new_h$mids,bi_rads_new_h$counts,labels=bi_rads_new_h$counts, adj=c(0.5, -0.5))
 axis(1, bi_rads_new_h$mids, seq_along(bi_rads_new_h$mids))
 
-age_new_h <- hist(data_clean$age, main="Wiek pacjentki (w latach)", xlab="Wiek", ylab="Ilosc wystapien", xlim=c(0,100), breaks=99, col="#F08080")
+age_new_h <- hist(data_clean$age, main="Wiek pacjentki (w latach)", xlab="Wiek", ylab="Ilosc wystapien", xlim=c(0,100), breaks=99, col=featureColors['age'])
 
-shape_new_h <- hist(data_clean$shape, main="Ksztalt guza", xlab="Ksztalt", ylab="Ilosc wystapien", xlim=c(0,4), ylim=c(0,400), breaks=0:4, col="#B0E0E6", xaxt="n")
+shape_new_h <- hist(data_clean$shape, main="Ksztalt guza", xlab="Ksztalt", ylab="Ilosc wystapien", xlim=c(0,4), ylim=c(0,400), breaks=0:4, col=featureColors['shape'], xaxt="n")
 text(shape_new_h$mids,shape_new_h$counts,labels=shape_new_h$counts, adj=c(0.5, -0.5))
 axis(1, shape_new_h$mids, c("round", "oval", "lobular", "irregular"), line=-1, lwd=0, lwd.ticks = 1)
 
-margin_new_h <- hist(data_clean$margin, main="Margines guza", xlab="Margines", ylab="Ilosc wystapien", xlim=c(0,max(data_clean$margin, na.rm = TRUE)), ylim=c(0,400), breaks=0:5, col="#DEB887", xaxt="n")
+margin_new_h <- hist(data_clean$margin, main="Margines guza", xlab="Margines", ylab="Ilosc wystapien", xlim=c(0,max(data_clean$margin, na.rm = TRUE)), ylim=c(0,400), breaks=0:5, col=featureColors['margin'], xaxt="n")
 text(margin_new_h$mids,margin_new_h$counts,labels=margin_new_h$counts, adj=c(0.5, -0.5))
 axis(1, at=margin_new_h$mids, labels = rep_len("", length(margin_new_h$mids)), lwd=0, lwd.ticks = 1, line = -1)
 text(margin_new_h$mids, par("usr")[3] - 0.2, labels = c("circumscribed", "microlobulated", "obscured", "ill-defined", "spiculated"),
      srt = 25, pos = 1, xpd = TRUE)
 
-density_new_h <- hist(data_clean$density, main="Gestosc guza", xlab="Gestosc guza", ylab="Ilosc wystapien", xlim=c(0,max(data_clean$density, na.rm = TRUE)), ylim=c(0,800), breaks=0:4, col="#BA55D3", xaxt="n")
+density_new_h <- hist(data_clean$density, main="Gestosc guza", xlab="Gestosc guza", ylab="Ilosc wystapien", xlim=c(0,max(data_clean$density, na.rm = TRUE)), ylim=c(0,800), breaks=0:4, col=featureColors['density'], xaxt="n")
 text(density_new_h$mids,density_new_h$counts,labels=density_new_h$counts, adj=c(0.5, -0.5))
 axis(1, density_h$mids, c("high", "iso", "low", "fat-containing"), line=-1, lwd=0, lwd.ticks = 1)
 
 
-severity_new_h <- hist(data_clean$severity, right=F, main="Stopien zaawansowania guza", xlab="Zlosliwosc", ylab="Ilosc wystapien", xlim=c(0,1), ylim = c(0,500), breaks=2, col="#66CDAA", xaxt="n")
+severity_new_h <- hist(data_clean$severity, right=F, main="Stopien zaawansowania guza", xlab="Zlosliwosc", ylab="Ilosc wystapien", xlim=c(0,1), ylim = c(0,500), breaks=2, col=featureColors['severity'], xaxt="n")
 text(severity_new_h$mids,severity_new_h$counts,labels=severity_new_h$counts, adj=c(0.5, -0.5))
 axis(1, severity_new_h$mids, c("benign", "malignant"), line=-1, lwd=0, lwd.ticks = 1)
+
 ```
 
 ### Analiza zbioru pod katem determinant zlosliwosci guza
@@ -156,23 +157,23 @@ density_benVSmag <- t(prop.table(table(data_clean[c('density', 'severity')]), 1)
 # barploty
 par(mar = c(5.1, 4.1, 4.1, 6))
 b <- barplot(bi_rads_benVSmag, col = c("seagreen3", "firebrick3"),
-        main = "Ocena BI-RADS vs. udzial guzow lagodnych/zlosliwych",
-        xlab = "Ocena BI-RADS", ylab = "%",
-        legend.text = c("benign", "malignant"),
-        args.legend = list(x = "topright", inset = c(-0.2, 0)))
+             main = "Ocena BI-RADS vs. udzial guzow lagodnych/zlosliwych",
+             xlab = "Ocena BI-RADS", ylab = "%",
+             legend.text = c("benign", "malignant"),
+             args.legend = list(x = "topright", inset = c(-0.2, 0)))
 text(b[2], 0.48, "BRAK", col="tomato2", srt=90, font=2)
 
 barplot(age_benVSmag, col = c("seagreen3", "firebrick3"),
-           main = "Wiek pacjentki vs. udzial guzów lagodnych/zlosliwych",
-           xlab = "Wiek pacjentki", ylab = "%",
-           legend.text = c("benign", "malignant"),
-           args.legend = list(x = "topright", inset = c(-0.2, 0)))
+        main = "Wiek pacjentki vs. udzial guzów lagodnych/zlosliwych",
+        xlab = "Wiek pacjentki", ylab = "%",
+        legend.text = c("benign", "malignant"),
+        args.legend = list(x = "topright", inset = c(-0.2, 0)))
 
 b <- barplot(shape_benVSmag, col = c("seagreen3", "firebrick3"),
-           main = "Ksztalt masy vs. udzial guzow lagodnych/zlosliwych",
-           xlab = "Ksztalt masy", ylab = "%", xaxt="n",
-           legend.text = c("benign", "malignant"),
-           args.legend = list(x = "topright", inset = c(-0.2, 0)))
+             main = "Ksztalt masy vs. udzial guzow lagodnych/zlosliwych",
+             xlab = "Ksztalt masy", ylab = "%", xaxt="n",
+             legend.text = c("benign", "malignant"),
+             args.legend = list(x = "topright", inset = c(-0.2, 0)))
 
 axis(1, b, c("round", "oval", "lobular", "irregular"), line=-1, lwd=0, lwd.ticks = 1)
 
@@ -196,42 +197,139 @@ axis(1, b, c("high", "iso", "low", "fat-containing"), line=-1, lwd=0, lwd.ticks 
 
 ```
 
+## Macierz korelacji
+
+```{r conf_matrix, warning=FALSE, message=FALSE}
+require(reshape2)
+require(plotly)
+cormat <- round(cor(data_clean), 2);
+melted_cormat <- melt(cormat);
+
+# Get lower triangle of the correlation matrix
+get_lower_tri<-function(cormat){
+  cormat[upper.tri(cormat)] <- NA
+  return(cormat)
+}
+# Get upper triangle of the correlation matrix
+get_upper_tri <- function(cormat){
+  cormat[lower.tri(cormat)]<- NA
+  return(cormat)
+}
+
+upper_tri <- get_upper_tri(cormat);
+
+reorder_cormat <- function(cormat){
+  # Use correlation between variables as distance
+  dd <- as.dist((1-cormat)/2)
+  hc <- hclust(dd)
+  cormat <-cormat[hc$order, hc$order]
+}
+
+cormat <- reorder_cormat(cormat)
+upper_tri <- get_upper_tri(cormat)
+# Melt the correlation matrix
+melted_cormat <- melt(upper_tri, na.rm = TRUE)
+
+ggheatmap <- ggplot(melted_cormat, aes(Var2, Var1, fill = value))+
+      geom_tile(color = "white")+
+      scale_fill_gradient2(low = "black", high = "firebrick2", mid = "dodgerblue4", 
+                           midpoint = 0, limit = c(-1,1), space = "Lab", 
+                           name="Pearson\nCorrelation") +
+      theme_minimal()+ # minimal theme
+      theme(axis.text.x = element_text(angle = 45, vjust = 1, 
+                                       size = 12, hjust = 1))+
+      theme(axis.text.y = element_text(size = 12)) + 
+      coord_fixed()
+    
+    ggplotly(ggheatmap + 
+      geom_text(aes(Var2, Var1, label = value), color = "white", size = 4) +
+      theme(
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank(),
+        axis.ticks = element_blank(),
+        legend.justification = c(1, 0),
+        legend.position = c(0.6, 0.7),
+        legend.direction = "horizontal")+
+      guides(fill = guide_colorbar(barwidth = 7, barheight = 1,
+                                   title.position = "top", title.hjust = 0.5)))
+```
+
 ## Standaryzacja zbioru danych
-Do zakresu [-1.0; 1.0], bez labeli (czyli bez cechy severity):
+Do standardowego rozkładu normalnego N(0, 1), bez labeli (czyli bez cechy severity):
 
 ```{r standarize_data}
-data_stand <- data.frame(lapply(data_clean[,-dim(data_clean)[2]], scale), data_clean['severity'])
+s <- scale(data_clean[,2:5])
+
+scaled_centers <- attr(s, 'scaled:center')
+scaled_scales <- attr(s, 'scaled:scale')
+
+data_stand <- data.frame(age=s[,1], shape=s[,2], margin=s[,3], density=s[,4], data_clean['severity'])
+head(data_stand, 10)
 ```
 
 
 # Utworzenie oraz trening sieci neuronowej
-Na calym zbiorze, bez podzialu na zbior treningowy i testowy:
+Na zbiorze treningowym.
 
 ```{r neural_net, warning=FALSE, message=FALSE}
+
+library(rpart)
+library(caret)
 require(neuralnet)
 
-## 2 warstwy ukryte, funkcja aktywacji=sigmoid, funkcja straty=SSE
-nn <- neuralnet(severity ~ bi_rads+age+shape+margin+density, data=data_stand,
+#podział na zbior treningnowy i testowy
+#sev <- unlist(data_clean['severity'])
+
+
+sev <- data_clean$severity
+set.seed(100)
+part <- createDataPartition(sev, p = 0.8, list  = FALSE)
+
+training_set <- scale(data_clean[part, 2:5])
+scaled_centers <- attr(training_set, 'scaled:center')
+scaled_scales <- attr(training_set, 'scaled:scale')
+
+testing_set <- data_clean[-part, 2:5]
+
+training_sev <-sev[part]
+testing_sev <-sev[-part]
+
+
+
+data_stand_tr <- data.frame(age=training_set[,1], shape=training_set[,2], margin=training_set[,3], density=training_set[,4], training_sev)
+data_ts <- data.frame(age=testing_set[,1], shape=testing_set[,2], margin=testing_set[,3], density=testing_set[,4], testing_sev)
+
+nn <- neuralnet(training_sev ~ age+shape+margin+density, data=data_stand_tr,
                 err.fct = "sse", hidden = 2, act.fct = "logistic")
 
+predsVStarget_tr <- data.frame(case=rownames(data_stand_tr),
+                               predictions=factor(round(unlist(nn$net.result), digits = 0), labels = c('benign', 'malignant')),
+                               target=factor(data_stand_tr$training_sev, labels = c('benign', 'malignant')))
 
-predsVStarget <- data.frame(case=rownames(data_stand),
-                            predictions=factor(round(unlist(nn$net.result), digits = 0), labels = c('benign', 'malignant')),
-                            target=factor(data_stand$severity, labels = c('benign', 'malignant')))
+pred <-round(predict(nn, scale(testing_set, center = scaled_centers, scale = scaled_scales)), 2)
 
-## 10 pierwszych predykcji vs. targetow
-knitr::kable(head(predsVStarget, 10), caption = "10 pierwszych predykcji sieci")
+predsVStarget_ts <-data.frame(case = rownames(testing_set), 
+                              predictions=factor(round(pred, digits = 0), labels = c('benign', 'malignant')),
+                              target = factor(data_ts$testing_sev, labels = c('benign', 'malignant')))
+
+confMatrix_tr <- confusionMatrix(data=predsVStarget_tr$predictions, reference=predsVStarget_tr$target, positive = "malignant")
+confMatrix_ts <- confusionMatrix(data=predsVStarget_ts$predictions, reference=predsVStarget_ts$target, positive = "malignant")
 ```
 
-## Macierz pomylek
+### Macierze pomyłek
+```{r}
+confMatrix_tr
 
-```{r conf_matrix, warning=FALSE, message=FALSE}
-require(caret)
-confMatrix <- confusionMatrix(data=predsVStarget$predictions, reference=predsVStarget$target, positive = "malignant")
+fourfoldplot(confMatrix_tr$table, color = c("firebrick2", "seagreen3"),
+             conf.level = 0, margin = 1, main = "Macierz pomylek na zbiorze trenigowym")
 
-fourfoldplot(confMatrix$table, color = c("firebrick2", "seagreen3"),
-              conf.level = 0, margin = 1, main = "Macierz pomylek")
+confMatrix_ts
 
-confMatrix
+fourfoldplot(confMatrix_ts$table, color = c("firebrick2", "seagreen3"),
+             conf.level = 0, margin = 1, main = "Macierz pomylek na zbiorze testowym")
 ```
+
 

@@ -1,15 +1,19 @@
 ---
 title: "Mammographic Mass Analysis"
-author: "Monika Grzyb"
+author: "Aleksandra Sidor, Radosław Żelazo"
 date: '2022-05-14'
-output: html_document
+output: html_document:
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
 ```
+
+## Wczytanie zbioru danych Mammographic Mass
+Zbiór danych wczytany został do tablicy *data*. Niekompletne dane zostały zamienione na wartość NaN, a pozostałe - na wartości numeric.
+
 ```{r data_setup, echo=TRUE}
-#--------------------------ANALIZA DANYCH ITP-------------------------------------------
 #wczytanie danych
 data<-read.table("mammographic_masses.data", header=FALSE, sep=",");
 colnames(data) <- c('bi_rads', 'age', 'shape', 'margin', 'density', 'severity')
@@ -19,6 +23,15 @@ nan_data <- which(data=='?');
 new_data <- replace(data, data=='?', NA); #zamiana ? na NA
 new_data <- as.data.frame(lapply(new_data,as.numeric)) # konwersja wszystkich wartosci w dataframie na numeric
 
+```
+
+
+## Analiza zbioru danych Mammographic Mass
+### Histogramy dla poszczególnych cech w zbiorze danych
+Na podstawie poniższych histogramów można dokonać analizy statystycznej cech, np. wyznaczyć wartości minimalne i maksymalne oraz zauważyć wartości odstające.
+<br />
+W celu ujednolicenia wykresów, do konkretnych cech przypisane zostały kolory:
+```{r colors_setup, echo=TRUE}
 # Bindowanie kolorow do cech
 featureColors <- c(bi_rads="#9ACD32",
                   age="#F08080",
@@ -27,49 +40,59 @@ featureColors <- c(bi_rads="#9ACD32",
                   density="#BA55D3",
                   severity="#66CDAA")
 ```
-
-## Analiza zbioru danych Mammographic Mass
-Histogramy dla poszczególnych cech w zbiorze danych:
-
-```{r dirty_data_analysis, echo=TRUE}
-#-------------------------histogramy pierwsze---------------------
+<br />
+**Histogram cechy *BI-RADS* **
+```{r dirty_data_analysis_BI-RADS, echo=TRUE}
 
 bi_rads_h <- hist(new_data$bi_rads, main="Ocena BI-RADS", xlab="Wartosc", ylab="Ilosc wystapien", xlim=c(0,max(new_data$bi_rads, na.rm = TRUE)), ylim=c(0, 600), breaks=56, col=featureColors['bi_rads'])
 
 zero = which(bi_rads_h$counts == 0)
 text(bi_rads_h$mids[-zero],bi_rads_h$counts[-zero],labels=bi_rads_h$counts[-zero], adj=c(0.5, -0.5))
-
+```
+<br />
+**Histogram cechy *PATIENT'S AGE* **
+```{r dirty_data_analysis_AGE, echo=TRUE}
 age_h <- hist(new_data$age, main="Wiek pacjentki (w latach)", xlab="Wiek", ylab="Ilosc wystapien", xlim=c(0,100), breaks=99, col=featureColors['age'])
-
-
+```
+<br />
+**Histogram cechy *MASS SHAPE* **
+```{r dirty_data_analysis_SHAPE, echo=TRUE}
 shape_h <- hist(new_data$shape, main="Ksztalt guza", xlab="Ksztalt", ylab="Ilosc wystapien", xlim=c(0,4), ylim=c(0, 450), breaks=0:4, col=featureColors['shape'], xaxt="n")
 text(shape_h$mids,shape_h$counts,labels=shape_h$counts, adj=c(0.5, -0.5))
 axis(1, shape_h$mids, c("round", "oval", "lobular", "irregular"), line=-1, lwd=0, lwd.ticks = 1)
-
-
+```
+<br />
+**Histogram cechy *MASS MARGIN* **
+```{r dirty_data_analysis_MARGIN, echo=TRUE}
 margin_h <- hist(new_data$margin, main="Margines guza", xlab="Margines", ylab="Ilosc wystapien", xlim=c(0,max(new_data$margin, na.rm = TRUE)), ylim=c(0, 400), breaks=0:5, col=featureColors['margin'], xaxt="n")
 text(margin_h$mids,margin_h$counts,labels=margin_h$counts, adj=c(0.5, -0.5))
 axis(1, at=margin_h$mids, labels = rep_len("", length(margin_h$mids)), lwd=0, lwd.ticks = 1, line = -1)
 text(margin_h$mids, par("usr")[3] - 0.2, labels = c("circumscribed", "microlobulated", "obscured", "ill-defined", "spiculated"),
      srt = 35, pos = 1, xpd = TRUE)
-
-
+```
+<br />
+**Histogram cechy *MASS DENSITY* **
+```{r dirty_data_analysis_DENSITY, echo=TRUE}
 density_h <- hist(new_data$density, main="Gestosc guza", xlab="Gestosc guza", ylab="Ilosc wystapien", xlim=c(0,max(new_data$density, na.rm = TRUE)), ylim=c(0, 850), breaks=0:4, col=featureColors['density'], xaxt="n")
 text(density_h$mids,density_h$counts,labels=density_h$counts, adj=c(0.5, -0.5))
 axis(1, density_h$mids, c("high", "iso", "low", "fat-containing"), line=-1, lwd=0, lwd.ticks = 1)
-
-
+```
+<br />
+**Histogram cechy *MASS SEVERITY* **
+```{r dirty_data_analysis_SEVERITY, echo=TRUE}
 severity_h <- hist(new_data$severity, right=F, main="Stopien zaawansowania guza", xlab="Zlosliwosc", ylab="Ilosc wystapien", xlim=c(0,1), ylim = c(0,600), breaks=2, col=featureColors['severity'], xaxt="n")
 text(severity_h$mids,severity_h$counts,labels=severity_h$counts, adj=c(0.5, -0.5))
 axis(1, severity_h$mids, c("benign", "malignant"), line=-1, lwd=0, lwd.ticks = 1)
 ```
 
 
-## Statystyki zbioru danych Mammographic Mass (z pominieciem wartości NA)
-Definicja funkcji + obliczenie statystyk zbioru:
 
+### Statystyki zbioru danych Mammographic Mass (z pominieciem wartości NA)
+
+**Poniżej zaimplementowana funkcja *static_values* służy do wyznaczania wartości statystycznych poszczególnych cech, z pominięciem wartości NaN.**
+Oblicza ona wartości minimalne i maksymalne, średnią, odchylenie standardowe i wariancję, medianę oraz dominantę.
 ```{r dataset_statistics, echo=TRUE}
-#--------funckje wazne----------------------------
+
 getmode <- function(v, na.rm=TRUE) {
   uniqv <- unique(v)
   uniqv[which.max(tabulate(match(v, uniqv)))]
@@ -92,48 +115,72 @@ static_values <- function(v) {
 (data_stats <- sapply(new_data, static_values))
 ```
 
-### Czyszczenie zbioru danych z wartosci NA oraz wartosci odstajacych
-Wartosc bi_rads=55 powstala prawdopodobnie w wyniku bledu podczas tworzenia
-zbioru danych Mammographic Mass. Zakladamy, ze chodzilo o wartosc 5 i na taka
-podmieniamy ewidentnie bledna wartosc:
+## Porządkowanie zbioru danych  
+
+**Porządkowanie zbioru danych miało na celu usunięcię niekompletnych danych oraz określenie postępowania w przypadku wartości odstających.**
+
+Zbiór danych z usuniętymi wartościami NaN zapisany został w zmiennej *data_clean*.
+
+Jedyną zauważoną wartością odstającą jest wartość 55 określająca cechę BI-RADS. Prawdopodobnie powstała ona w wyniku błędu przy przepisywaniu danych.
+Można założyć, że liczba 55 jest zdupliowaną cyfrą 5. Z tego powodu w zbiorze *Mammographic Mass* została one ostatecznie zapisana jako wartość 5.
+Wpływ na to miał równiez fakt, że wektor z ta wartością nie zawierał żadnych niekompletnych danych, a po wyczyszczeniu zbioru jego liczebność zmalała do 830.
+usunięcie kompletnego wektoru mogłoby narazić sieć na utratę istotnych danych.
+
 
 ```{r cleanse}
-#------------------------USUNIECIE NIEKOMPLETNYCH DANYCH--------------------------------
-
+#usunięcie niekompletnych danych
 data_clean <- new_data[complete.cases(new_data), ]
 
 
-#dealing with element odstajacy
+#element odstajacy
 data_clean$bi_rads[data_clean$bi_rads==55] <- 5
 
 ```
 
-## Analiza zbioru danych Mammographic Mass po wyczyszczeniu danych
+## Analiza zbioru danych Mammographic Mass po wyczyszczeniu danych  
 
-```{r clean_data_analysis}
-#-------------------------histogramy po czyszczeniu---------------------
+### Histogramy dla poszczególnych cech w wyczyszczonym zbiorze danych
+
+<br />
+**Histogram cechy *BI-RADS* **
+```{r clean_data_analysis_BI-RADS}
+
 
 bi_rads_new_h <- hist(data_clean$bi_rads, main="Ocena BI-RADS", xlab="Wartosc", ylab="Ilosc wystapien", xlim=c(0,6), ylim=c(0, 500), breaks=-0.5:6.5, col=featureColors['bi_rads'], xaxt="n")
 text(bi_rads_new_h$mids,bi_rads_new_h$counts,labels=bi_rads_new_h$counts, adj=c(0.5, -0.5))
 axis(1, bi_rads_new_h$mids, seq_along(bi_rads_new_h$mids))
-
+```
+<br />
+**Histogram cechy *PATIENT'S AGE* **
+```{r clean_data_analysis_AGE}
 age_new_h <- hist(data_clean$age, main="Wiek pacjentki (w latach)", xlab="Wiek", ylab="Ilosc wystapien", xlim=c(0,100), breaks=99, col=featureColors['age'])
-
+```
+<br />
+**Histogram cechy *MASS SHAPE* **
+```{r clean_data_analysis_SHAPE}
 shape_new_h <- hist(data_clean$shape, main="Ksztalt guza", xlab="Ksztalt", ylab="Ilosc wystapien", xlim=c(0,4), ylim=c(0,400), breaks=0:4, col=featureColors['shape'], xaxt="n")
 text(shape_new_h$mids,shape_new_h$counts,labels=shape_new_h$counts, adj=c(0.5, -0.5))
 axis(1, shape_new_h$mids, c("round", "oval", "lobular", "irregular"), line=-1, lwd=0, lwd.ticks = 1)
-
+```
+<br />
+**Histogram cechy *MASS MARGIN* **
+```{r clean_data_analysis_MARGIN}
 margin_new_h <- hist(data_clean$margin, main="Margines guza", xlab="Margines", ylab="Ilosc wystapien", xlim=c(0,max(data_clean$margin, na.rm = TRUE)), ylim=c(0,400), breaks=0:5, col=featureColors['margin'], xaxt="n")
 text(margin_new_h$mids,margin_new_h$counts,labels=margin_new_h$counts, adj=c(0.5, -0.5))
 axis(1, at=margin_new_h$mids, labels = rep_len("", length(margin_new_h$mids)), lwd=0, lwd.ticks = 1, line = -1)
 text(margin_new_h$mids, par("usr")[3] - 0.2, labels = c("circumscribed", "microlobulated", "obscured", "ill-defined", "spiculated"),
      srt = 25, pos = 1, xpd = TRUE)
-
+```
+<br />
+**Histogram cechy *MASS DENSITY* **
+```{r clean_data_analysis_DENSITY}
 density_new_h <- hist(data_clean$density, main="Gestosc guza", xlab="Gestosc guza", ylab="Ilosc wystapien", xlim=c(0,max(data_clean$density, na.rm = TRUE)), ylim=c(0,800), breaks=0:4, col=featureColors['density'], xaxt="n")
 text(density_new_h$mids,density_new_h$counts,labels=density_new_h$counts, adj=c(0.5, -0.5))
 axis(1, density_h$mids, c("high", "iso", "low", "fat-containing"), line=-1, lwd=0, lwd.ticks = 1)
-
-
+```
+<br />
+**Histogram cechy *MASS SEVERITY* **
+```{r clean_data_analysis_SEVERITY}
 severity_new_h <- hist(data_clean$severity, right=F, main="Stopien zaawansowania guza", xlab="Zlosliwosc", ylab="Ilosc wystapien", xlim=c(0,1), ylim = c(0,500), breaks=2, col=featureColors['severity'], xaxt="n")
 text(severity_new_h$mids,severity_new_h$counts,labels=severity_new_h$counts, adj=c(0.5, -0.5))
 axis(1, severity_new_h$mids, c("benign", "malignant"), line=-1, lwd=0, lwd.ticks = 1)
@@ -142,6 +189,10 @@ axis(1, severity_new_h$mids, c("benign", "malignant"), line=-1, lwd=0, lwd.ticks
 
 ### Analiza zbioru pod katem determinant zlosliwosci guza
 
+Sprawdzono udział guzów łagodnych i złośliwych w zbiorze,
+w zależności od wartości danej cechy i zwizualizowano w postaci barplotów.
+Wgląd w wykreślone dane pozwala (w pewnym ograniczonym stopniu) przewidywać,
+dla których wartości których cech, spodziewać się możemy, że masa guzowa będzie łagodna, a która złośliwa.
 ```{r severity_analysis}
 
 bi_rads_benVSmag <- as.matrix(t(prop.table(table(data_clean[c('bi_rads', 'severity')]), 1)))
@@ -198,7 +249,10 @@ axis(1, b, c("high", "iso", "low", "fat-containing"), line=-1, lwd=0, lwd.ticks 
 ```
 
 ## Macierz korelacji
-
+Macierz korelacji pozwala zwizualizować korelacje między cechami zbioru danych. 
+Jako miarę korelacji między cechami zastosowano współczynnik korelacji Pearsona.
+Z wykresu usunięto elementy znajdujące się ponad główną przekątną macierzy,
+aby niepotrzebnie nie duplikować korelacji między poszczególnymi cechami.
 ```{r conf_matrix, warning=FALSE, message=FALSE}
 require(reshape2)
 require(plotly)
@@ -258,7 +312,12 @@ ggheatmap <- ggplot(melted_cormat, aes(Var2, Var1, fill = value))+
 ```
 
 ## Standaryzacja zbioru danych
-Do standardowego rozkładu normalnego N(0, 1), bez labeli (czyli bez cechy severity):
+Do standardowego rozkładu normalnego N(0, 1), bez labeli (czyli bez cechy severity).
+Standardowy rozkład normalny każdej cechy uzyskujemy poprzez odjęcie od wartości każdej cechy w zbiorze jej średnią wartość,
+a następnie podzielenie uzyskanego wyniku przez odchylenie standardowe cechy.
+Wyznaczone średnie (scaled_centers) i odchylenia standardowe (scaled_scales) cech
+zapamiętujemy w zmiennych w celu standaryzowania za ich pomocą danych dostarczonych 
+przez użytkownika.
 
 ```{r standarize_data}
 s <- scale(data_clean[,2:5])
@@ -272,7 +331,13 @@ head(data_stand, 10)
 
 
 # Utworzenie oraz trening sieci neuronowej
-Na zbiorze treningowym.
+Tworzymy sieć złożoną z 1 warstwy ukrytej o 6 neuronach. Zastosowaną funkcją aktywacji
+jest funkcja sigmoid unipolarna, natomiast zastosowaną funkcją błędu jest błąd średniokwadratowy.
+Zbiór ustandaryzowanych danych podzielony został na zbiory treningowy oraz testowy w stosunku 0.8:0.2.
+Trening sieci dokonywany był na zbiorze treningowym. Podział danych z wykorzystaniem 
+funkcji createDataPartition z pakietu caret wykonywany jest z zachowaniem proporcji klas z zbiorach
+(podział ze stratyfikacją).
+Jako klasę "pozytywną" przyjęto klasę 'malignant'.
 
 ```{r neural_net, warning=FALSE, message=FALSE}
 
@@ -303,7 +368,7 @@ data_stand_tr <- data.frame(age=training_set[,1], shape=training_set[,2], margin
 data_ts <- data.frame(age=testing_set[,1], shape=testing_set[,2], margin=testing_set[,3], density=testing_set[,4], testing_sev)
 
 nn <- neuralnet(training_sev ~ age+shape+margin+density, data=data_stand_tr,
-                err.fct = "sse", hidden = 2, act.fct = "logistic")
+                err.fct = "sse", hidden = c(6), act.fct = "logistic")
 
 predsVStarget_tr <- data.frame(case=rownames(data_stand_tr),
                                predictions=factor(round(unlist(nn$net.result), digits = 0), labels = c('benign', 'malignant')),
@@ -320,6 +385,9 @@ confMatrix_ts <- confusionMatrix(data=predsVStarget_ts$predictions, reference=pr
 ```
 
 ### Macierze pomyłek
+Macierze pomyłek służą do oceny osiągów sieci zarówno na zbiorze danych treningowych jak
+i zbiorze danych testowych. Zawierają one m.in. informacje o dokładności predykcji sieci,
+a także ocenę osiągniętej czułości oraz specyficzności.
 ```{r}
 confMatrix_tr
 
@@ -331,5 +399,3 @@ confMatrix_ts
 fourfoldplot(confMatrix_ts$table, color = c("firebrick2", "seagreen3"),
              conf.level = 0, margin = 1, main = "Macierz pomylek na zbiorze testowym")
 ```
-
-

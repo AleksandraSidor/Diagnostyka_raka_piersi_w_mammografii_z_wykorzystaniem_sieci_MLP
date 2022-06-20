@@ -18,8 +18,8 @@ stackedBarPlotYLabs <- c(stack='Number of cases',
                          fill='Fraction of cases')
 
 # Ladowanie danych obliczonych w pliku '3.R'
-#setwd("C:/Users/aleks/OneDrive/Pulpit/sem6/PADR/R-main")
-setwd("C:/Users/Admin/Studia/Semestr 6/PADR/R-main")
+setwd("C:/Users/aleks/OneDrive/Pulpit/sem6/PADR/R-main")
+# setwd("C:/Users/Admin/Studia/Semestr 6/PADR/R-main")
 source("3.R")
 
 # Define UI for application that draws a histogram
@@ -226,11 +226,11 @@ tags$script("
                                                                selectInput(inputId = 'layers',
                                                                            label = 'Number of hidden layers',
                                                                            choices = c('1' = 1, '2' = 2),
-                                                                           selected = '2'))),
+                                                                           selected = '1'))),
                                                fluidRow(column(5, offset = 1, align = 'center',
                                                                numericInput(inputId = 'first_layer',
                                                                             label = 'Number of neurons in 1st layer',
-                                                                            value = 3,
+                                                                            value = 6,
                                                                             min = 1,
                                                                             max = 8, 
                                                                             step = 1)),
@@ -369,6 +369,10 @@ server <- function(input, output, session) {
       p <- p + scale_x_discrete(breaks=seq(15,100,5))
     }
     
+    if(chosen_feature=="bi_rads") {
+      p <- p + scale_x_discrete(breaks=seq(0,6), drop=F)
+    }
+    
     ggplotly(p)
     
   })
@@ -387,6 +391,10 @@ server <- function(input, output, session) {
     
     if(chosen_feature=="age") {
       p <- p + scale_x_discrete(breaks=seq(15,100,5))
+    }
+    
+    if(chosen_feature=="bi_rads") {
+      p <- p + scale_x_discrete(breaks=seq(0,6), drop=F)
     }
     
     ggplotly(p)

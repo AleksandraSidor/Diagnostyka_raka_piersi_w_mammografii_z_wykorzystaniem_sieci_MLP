@@ -18,9 +18,10 @@ stackedBarPlotYLabs <- c(stack='Number of cases',
                          fill='Fraction of cases')
 
 # Ladowanie danych obliczonych w pliku '3.R'
-setwd("C:/Users/aleks/OneDrive/Pulpit/sem6/PADR/R-main")
-# setwd("C:/Users/Admin/Studia/Semestr 6/PADR/R-main")
+# setwd("C:/Users/aleks/OneDrive/Pulpit/sem6/PADR/R-main")
+setwd("C:/Users/Admin/Studia/Semestr 6/PADR/R-main")
 source("3.R")
+set.seed(100)
 
 # Define UI for application that draws a histogram
 ui <- dashboardPage(skin = "green",
@@ -322,7 +323,7 @@ server <- function(input, output, session) {
   
   withProgress(message="Retraining neural network...", value = 0.5, {
     nn <<- neuralnet(training_sev ~ age+shape+margin+density, data=data_stand_tr,
-                    err.fct = "sse", hidden = v2, act.fct = "logistic")
+                    err.fct = "sse", hidden = v2, act.fct = "logistic", linear.output=FALSE)
     
     incProgress(0.45, message = "Neural network successfully retrained")
     Sys.sleep(1)

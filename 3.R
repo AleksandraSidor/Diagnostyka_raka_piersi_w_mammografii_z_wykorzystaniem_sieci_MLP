@@ -1,6 +1,6 @@
 #--------------------------USTAWIENIE WD------------------------------------------------
-#setwd("C:/Users/Admin/Studia/Semestr 6/PADR/R-main")
-setwd("C:/Users/aleks/OneDrive/Pulpit/sem6/PADR/R-main")
+setwd("C:/Users/Admin/Studia/Semestr 6/PADR/R-main")
+# setwd("C:/Users/aleks/OneDrive/Pulpit/sem6/PADR/R-main")
 #--------------------------ANALIZA DANYCH ITP-------------------------------------------
 #wczytanie danych
 data<-read.table("mammographic_masses.data", header=FALSE, sep=",");
@@ -104,7 +104,7 @@ data_stand_tr <- data.frame(age=training_set[,1], shape=training_set[,2], margin
 data_ts <- data.frame(age=testing_set[,1], shape=testing_set[,2], margin=testing_set[,3], density=testing_set[,4], testing_sev)
 
 nn <- neuralnet(training_sev ~ age+shape+margin+density, data=data_stand_tr,
-                err.fct = "sse", hidden = 6, act.fct = "logistic")
+                err.fct = "sse", hidden = 6, act.fct = "logistic", linear.output=FALSE)
 
 predsVStarget_tr <- data.frame(case=rownames(data_stand_tr),
                                predictions=factor(round(unlist(nn$net.result), digits = 0), labels = c('benign', 'malignant')),

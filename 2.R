@@ -186,7 +186,7 @@ require(neuralnet)
 
 ## 2 warstwy ukryte, funkcja aktywacji=sigmoid, funkcja straty=SSE
 nn <- neuralnet(severity ~ age+shape+margin+density, data=data_stand,
-                err.fct = "sse", hidden = 2, act.fct = "logistic")
+                err.fct = "sse", hidden = 2, act.fct = "logistic", linear.output=FALSE)
 
 
 predsVStarget <- data.frame(case=rownames(data_stand),
